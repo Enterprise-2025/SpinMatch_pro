@@ -1,0 +1,98 @@
+[
+  {
+    "nome": "Poliambulatorio Iris",
+    "contesto": "Poliambulatorio multi-specialistico, 12 medici",
+    "tag": {
+      "size": "m",
+      "canale": "sito web",
+      "focus": "prenotazioni",
+      "gestionale": "gipo"
+    },
+    "leva": "Agenda integrata + reminder automatici",
+    "metrica": {
+      "label": "No-show",
+      "delta": "-28%"
+    },
+    "incremento": 18
+  },
+  {
+    "nome": "Centro Medico Alfa",
+    "contesto": "Centro diagnostico, 24 medici",
+    "tag": {
+      "size": "l",
+      "canale": "telefono",
+      "focus": "processi",
+      "gestionale": "altro"
+    },
+    "leva": "Workflow reception + prenotazioni online",
+    "metrica": {
+      "label": "Tempo front-office",
+      "delta": "-35%"
+    },
+    "incremento": 22
+  },
+  {
+    "nome": "Studio Salute+",
+    "contesto": "Studio privato, 4 medici",
+    "tag": {
+      "size": "s",
+      "canale": "miodottore",
+      "focus": "visibilità",
+      "gestionale": "nessuno"
+    },
+    "leva": "CRM smart + visibilità profili",
+    "metrica": {
+      "label": "Pazienti/mese",
+      "delta": "+27%"
+    },
+    "incremento": 20
+  },
+  {
+    "nome": "Clinica Borgo",
+    "contesto": "Poliambulatorio specialistico, 15 medici",
+    "tag": {
+      "size": "m",
+      "canale": "telefono",
+      "focus": "prenotazioni",
+      "gestionale": "gipo"
+    },
+    "leva": "Online booking + conferme SMS",
+    "metrica": {
+      "label": "Prenotazioni online",
+      "delta": "+32%"
+    },
+    "incremento": 24
+  },
+  {
+    "nome": "CDT Emilia",
+    "contesto": "Diagnostica per immagini, 8 medici",
+    "tag": {
+      "size": "m",
+      "canale": "sito web",
+      "focus": "processi",
+      "gestionale": "altro"
+    },
+    "leva": "Dashboard turni + auto-assegnazione slot",
+    "metrica": {
+      "label": "Slot riempiti",
+      "delta": "+21%"
+    },
+    "incremento": 16
+  },
+  {
+    "nome": "Studio Viale",
+    "contesto": "Studio privato, 6 medici",
+    "tag": {
+      "size": "s",
+      "canale": "telefono",
+      "focus": "visibilità",
+      "gestionale": "nessuno"
+    },
+    "leva": "Campagne locali + pagina servizi",
+    "metrica": {
+      "label": "Lead qualificati",
+      "delta": "+19%"
+    },
+    "incremento": 14
+  }
+]
