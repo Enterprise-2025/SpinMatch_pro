@@ -1,4 +1,4 @@
-// script.js — SpinMatch Pro (clean 2025-08-27)
+// script.js — SpinMatch Pro (clean • updated for PDF viewer)
 (() => {
   "use strict";
 
@@ -13,6 +13,13 @@
   const URLS = {
     PREVENTIVO: "https://enterprise-2025.github.io/Accesso-preventivatori/",
   };
+
+  // Se vuoi puntare a un cases.json personalizzato o disattivarlo:
+  // <script>window.SPINMATCH_CASES_URL = "path/cases.json";</script>
+  // <script>window.SPINMATCH_CASES_URL = null;</script>
+  const CASES_URL = Object.prototype.hasOwnProperty.call(window, "SPINMATCH_CASES_URL")
+    ? window.SPINMATCH_CASES_URL
+    : "./cases.json";
 
   const qs  = (id) => document.getElementById(id);
   const qsa = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -34,7 +41,7 @@
   const exportPDFBtn      = qs("exportPDF");
   const copyRecapBtn      = qs("copyRecap");
   const emailRecapBtn     = qs("emailRecap");
-  const openPreventivoBtn = qs("openPreventivo"); // <a> già con href target=_blank
+  const openPreventivoBtn = qs("openPreventivo"); // <a> con href target=_blank
 
   // Stato lead
   const leadPill  = qs("leadPill");
@@ -190,7 +197,7 @@
   const MIN_FIELDS = {
     0: ["clinica_nome"],
     1: ["struttura_tipo", "n_medici"],
-    2: [], // Costi Nascosti: nessun “tutti”
+    2: [], // Costi Nascosti: nessun “tutti” (usiamo regola "almeno uno")
     3: ["obiettivo_6m"],
     4: ["problema_principale"],
     5: ["consapevolezza", "interesse", "budget", "timeline", "blocco"],
@@ -290,11 +297,14 @@
   ];
 
   async function loadCatalog() {
+    // Disattiva il fetch se CASES_URL è null/false
+    if (CASES_URL === null || CASES_URL === false) return defaultCatalog;
+
     try {
-      const res = await fetch("./cases.json", { cache: "no-cache" });
-      if (!res.ok) throw new Error("no cases");
+      const res = await fetch(CASES_URL, { cache: "no-store" });
+      if (!res.ok) throw 0;
       const data = await res.json();
-      if (!Array.isArray(data) || !data.length) throw new Error("empty");
+      if (!Array.isArray(data) || !data.length) throw 0;
       return data;
     } catch {
       return defaultCatalog;
@@ -659,23 +669,35 @@
   }
 
   /* =========================
-   *  Modal “Presenta soluzioni” con viewer
+   *  Modal “Presenta soluzioni” con viewer (PDF/PPT)
    * ========================= */
-  const toAbsUrl    = (u) => new URL(u, window.location.href).href;
-  const officeEmbed = (u) => `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(u)}&wdAr=1.7777777777777777`;
+  const toAbsUrl = (u) => new URL(u, window.location.href).href;
+  const buildViewerSrc = (absUrl) => {
+    const u = absUrl.toLowerCase();
+    if (u.endsWith(".pdf")) {
+      // Viewer PDF nativo
+      return absUrl + "#toolbar=1&navpanes=0&view=FitH";
+    }
+    if (/\.(pptx?|docx?|xlsx?)$/.test(u)) {
+      // Office Web Viewer per file Office
+      return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(absUrl)}&wdAr=1.7777777777777777`;
+    }
+    // Fallback generico
+    return `https://docs.google.com/gview?embedded=1&url=${encodeURIComponent(absUrl)}`;
+  };
 
   function openDocViewer(docUrl, title){
     if (!docUrl) return toast("URL documento mancante");
     const abs   = toAbsUrl(docUrl);
-    const embed = officeEmbed(abs);
+    const embed = buildViewerSrc(abs);
 
     chooser?.classList.add("hidden");
     viewerWrap?.classList.remove("hidden");
     presentaBack?.classList.remove("hidden");
     openInNew?.classList.remove("hidden");
     if (presentaTitleEl) presentaTitleEl.textContent = title || "Presentazione";
-    if (openInNew) openInNew.href = embed;
     if (frame) frame.src = embed;
+    if (openInNew) openInNew.href = abs; // in nuova scheda apre il file originale
   }
 
   function backToChooser(){
@@ -740,7 +762,7 @@
     copyRecapBtn?.addEventListener("click", copyRecap);
     emailRecapBtn?.addEventListener("click", emailRecap);
 
-    // <a> già con href. Se venisse rimosso, apro quello di default.
+    // <a> già con href. Se rimosso per sbaglio, uso quello di default.
     openPreventivoBtn?.addEventListener("click", (e) => {
       const href = openPreventivoBtn.getAttribute("href");
       if (!href) { e.preventDefault(); openExternal(URLS.PREVENTIVO, "Preventivo"); }
@@ -770,3 +792,4 @@
 
   document.addEventListener("DOMContentLoaded", init);
 })();
+
