@@ -13,7 +13,7 @@
   <!-- CSS -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Vendor (tutti defer per performance) -->
+  <!-- Vendor (defer per performance) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
@@ -60,7 +60,8 @@
           <li><button class="step-link" data-step="2" aria-controls="step-2"><i data-lucide="wallet"></i> 2. Costi Nascosti</button></li>
           <li><button class="step-link" data-step="3" aria-controls="step-3"><i data-lucide="trending-up"></i> 3. Opportunità</button></li>
           <li><button class="step-link" data-step="4" aria-controls="step-4"><i data-lucide="help-circle"></i> 4. SPIN Selling</button></li>
-          <li><button class="step-link" data-step="5" aria-controls="step-5"><i data-lucide="check-square"></i> 5. Survey Finale</button></li>
+          <!-- Step 5 inizialmente nascosto per evitare flicker; lo script lo mostrerà quando sbloccato -->
+          <li><button class="step-link" data-step="5" aria-controls="step-5" style="display:none;"><i data-lucide="check-square"></i> 5. Survey Finale</button></li>
         </ul>
       </nav>
     </aside>
@@ -122,9 +123,9 @@
               <label for="struttura_tipo">Tipo di struttura</label>
               <select id="struttura_tipo" name="struttura_tipo" data-altro-target="struttura_tipo_altro" aria-controls="struttura_tipo_altro" aria-describedby="altroHint1">
                 <option value="">-- Seleziona --</option>
-                <option>Poliambulatorio</option>
-                <option>Centro medico</option>
-                <option>Studio privato</option>
+                <option value="poliambulatorio">Poliambulatorio</option>
+                <option value="centro medico">Centro medico</option>
+                <option value="studio privato">Studio privato</option>
                 <option value="altro">Altro</option>
               </select>
               <small id="altroHint1" class="hint">Se scegli “Altro”, apparirà un campo per specificare.</small>
@@ -143,15 +144,14 @@
               <label for="gestionale">Gestionale in uso</label>
               <select id="gestionale" name="gestionale" data-altro-target="gestionale_altro" aria-controls="gestionale_altro" aria-describedby="altroHint2">
                 <option value="">-- Seleziona --</option>
-                <option>Nessuno</option>
-                <option>GipoNext</option>
-                <option>Altro CRM</option>
-                <option value="altro">Altro</option>
+                <option value="nessuno">Nessuno / Excel / Cartaceo</option>
+                <option value="crm">CRM o Marketing esterno</option>
+                <option value="altro">Altro gestionale</option>
               </select>
-              <small id="altroHint2" class="hint">Se scegli “Altro”, apparirà un campo per specificare.</small>
+              <small id="altroHint2" class="hint">Se scegli “Altro gestionale”, apparirà un campo per specificare.</small>
             </div>
             <div class="form-group hidden" id="grp_gestionale_altro">
-              <label for="gestionale_altro">Specificare “Altro”</label>
+              <label for="gestionale_altro">Specificare “Altro gestionale”</label>
               <input id="gestionale_altro" name="gestionale_altro" type="text" disabled />
             </div>
 
@@ -159,9 +159,9 @@
               <label for="prenotazioni_canale">Canale principale di prenotazione</label>
               <select id="prenotazioni_canale" name="prenotazioni_canale" data-altro-target="prenotazioni_canale_altro" aria-controls="prenotazioni_canale_altro" aria-describedby="altroHint3">
                 <option value="">-- Seleziona --</option>
-                <option>Telefono</option>
-                <option>Sito web</option>
-                <option>MioDottore</option>
+                <option value="telefono">Telefono</option>
+                <option value="sito web">Sito web</option>
+                <option value="miodottore">MioDottore</option>
                 <option value="altro">Altro</option>
               </select>
               <small id="altroHint3" class="hint">Se scegli “Altro”, apparirà un campo per specificare.</small>
@@ -190,9 +190,9 @@
               <label for="area_critica">Area più critica</label>
               <select id="area_critica" name="area_critica" data-altro-target="area_critica_altro" aria-controls="area_critica_altro">
                 <option value="">-- Seleziona --</option>
-                <option>No-show</option>
-                <option>Overbooking/Agende</option>
-                <option>Inseguiti al telefono</option>
+                <option value="no-show">No-show</option>
+                <option value="overbooking/agende">Overbooking/Agende</option>
+                <option value="inseguiti al telefono">Inseguiti al telefono</option>
                 <option value="altro">Altro</option>
               </select>
             </div>
@@ -212,9 +212,9 @@
               <label for="obiettivo_6m">Obiettivo 6 mesi</label>
               <select id="obiettivo_6m" name="obiettivo_6m" data-altro-target="obiettivo_6m_altro" aria-controls="obiettivo_6m_altro">
                 <option value="">-- Seleziona --</option>
-                <option>Aumentare pazienti</option>
-                <option>Ottimizzare processi</option>
-                <option>Ridurre costi</option>
+                <option value="aumentare pazienti">Aumentare pazienti</option>
+                <option value="ottimizzare processi">Ottimizzare processi</option>
+                <option value="ridurre costi">Ridurre costi</option>
                 <option value="altro">Altro</option>
               </select>
             </div>
@@ -227,9 +227,9 @@
               <label for="miglioramento_top">Miglioramento più utile</label>
               <select id="miglioramento_top" name="miglioramento_top" data-altro-target="miglioramento_top_altro" aria-controls="miglioramento_top_altro">
                 <option value="">-- Seleziona --</option>
-                <option>Automatizzare prenotazioni</option>
-                <option>CRM follow-up</option>
-                <option>Reportistica avanzata</option>
+                <option value="automatizzare prenotazioni">Automatizzare prenotazioni</option>
+                <option value="crm follow-up">CRM follow-up</option>
+                <option value="reportistica avanzata">Reportistica avanzata</option>
                 <option value="altro">Altro</option>
               </select>
             </div>
@@ -249,9 +249,9 @@
               <label for="problema_principale">Problema principale oggi</label>
               <select id="problema_principale" name="problema_principale" data-altro-target="problema_principale_altro" aria-controls="problema_principale_altro">
                 <option value="">-- Seleziona --</option>
-                <option>Agende caotiche</option>
-                <option>No-show alto</option>
-                <option>Processi scollegati</option>
+                <option value="agende caotiche">Agende caotiche</option>
+                <option value="no-show alto">No-show alto</option>
+                <option value="processi scollegati">Processi scollegati</option>
                 <option value="altro">Altro</option>
               </select>
             </div>
@@ -264,9 +264,9 @@
               <label for="implicazioni">Implicazioni principali</label>
               <select id="implicazioni" name="implicazioni" data-altro-target="implicazioni_altro" aria-controls="implicazioni_altro">
                 <option value="">-- Seleziona --</option>
-                <option>Perdite economiche</option>
-                <option>Clienti insoddisfatti</option>
-                <option>Team sotto stress</option>
+                <option value="perdite economiche">Perdite economiche</option>
+                <option value="clienti insoddisfatti">Clienti insoddisfatti</option>
+                <option value="team sotto stress">Team sotto stress</option>
                 <option value="altro">Altro</option>
               </select>
             </div>
@@ -279,9 +279,9 @@
               <label for="situazione_ideale">Situazione ideale</label>
               <select id="situazione_ideale" name="situazione_ideale" data-altro-target="situazione_ideale_altro" aria-controls="situazione_ideale_altro">
                 <option value="">-- Seleziona --</option>
-                <option>Sistema unico integrato</option>
-                <option>Promemoria automatici</option>
-                <option>Dashboard realtime</option>
+                <option value="sistema unico integrato">Sistema unico integrato</option>
+                <option value="promemoria automatici">Promemoria automatici</option>
+                <option value="dashboard realtime">Dashboard realtime</option>
                 <option value="altro">Altro</option>
               </select>
             </div>
@@ -303,8 +303,8 @@
           </div>
         </fieldset>
 
-        <!-- STEP 5 -->
-        <fieldset class="step" id="step-5" aria-label="Survey finale">
+        <!-- STEP 5 (rigorous unlock: hidden by default, mostrato dallo script) -->
+        <fieldset class="step" id="step-5" aria-label="Survey finale" hidden>
           <legend><i data-lucide="check-square"></i> 5. Survey Finale</legend>
 
           <div class="form-grid">
@@ -401,6 +401,12 @@
         </div>
       </div>
 
+      <!-- NEW: Box motivazioni -->
+      <div class="card" id="matchWhy" hidden>
+        <h4 class="chart-title"><i data-lucide="info"></i> Perché questa scelta</h4>
+        <ul id="matchWhyList" class="bullet-list"></ul>
+      </div>
+
       <div class="card" id="caseStudyCard" hidden>
         <h4 class="chart-title"><i data-lucide="folders"></i> 3 Case study coerenti</h4>
         <div id="caseStudyGrid"></div>
@@ -446,6 +452,13 @@
            aria-label="Vai al preventivo">
           <i data-lucide="file-signature" aria-hidden="true"></i> Vai al preventivo
         </a>
+
+        <!-- NEW: Fissa appuntamento (imposta data-url o window.BOOKING_URL) -->
+        <button id="bookMeeting" class="btn-secondary" type="button"
+                data-url="https://calendar.app.google/INSERISCI-IL-TUO-LINK-PUBBLICO"
+                aria-label="Fissa appuntamento sul mio calendario">
+          <i data-lucide="calendar"></i> Fissa appuntamento
+        </button>
       </div>
     </aside>
   </div>
@@ -497,8 +510,7 @@
       <div class="modal-body">
         <!-- Scelta -->
         <div id="presentaChooser" class="actions-row">
-          <!-- Metti i PDF nella cartella /presentazioni/ con questi nomi: -->
-          <!-- /presentazioni/giponext.pdf e /presentazioni/miodottore-crm.pdf -->
+          <!-- Aggiorna i percorsi se i nomi dei PDF sono diversi -->
           <button id="openGipo" class="btn-primary" type="button" data-doc-url="presentazioni/giponext.pdf">
             <i data-lucide="file-text" aria-hidden="true"></i> GipoNext
           </button>
@@ -519,8 +531,8 @@
     <p>SpinMatch Pro — Discovery, raccomandazione e chiusura.</p>
   </footer>
 
-  <!-- Config opzionale: disattiva il fetch di cases.json per evitare 404 -->
-  <script>window.SPINMATCH_CASES_URL = null;</script>
+  <!-- (Opzionale) Se vuoi evitare 404 su cases.json:
+  <script>window.SPINMATCH_CASES_URL = null;</script> -->
 
   <!-- App script -->
   <script src="script.js" defer></script>
