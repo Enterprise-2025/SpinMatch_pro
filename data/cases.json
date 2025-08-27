@@ -15,7 +15,7 @@
       "delta": "1.700"
     },
     "incremento": 19,
-    "pdf": "./CDM111-miodottore-1700-prenotazioni.pdf"
+    "pdf": "./CDM111 ha gestito 1700 prenotazioni in un anno con MioDottore.pdf"
   },
   {
     "nome": "Homedica (Merone)",
@@ -33,7 +33,7 @@
       "delta": "+450"
     },
     "incremento": 22,
-    "pdf": "./homedica-giponext-miodottore-visibilita-pazienti.pdf"
+    "pdf": "./Gipo e MioDottore hanno assicurato visibilità e pazienti ad Homedica.pdf"
   },
   {
     "nome": "Centro Medico Proxima (Milano)",
@@ -51,7 +51,7 @@
       "delta": "≈4.500/anno (35% fuori orario)"
     },
     "incremento": 24,
-    "pdf": "./proxima-giponext-miodottore-innovazione-crescita.pdf"
+    "pdf": "./Giponext e MioDottore_ Innovazione e Crescita al Centro Medico Proxima.pdf"
   },
   {
     "nome": "Check Up Centre (Cavallino)",
@@ -69,6 +69,6 @@
       "delta": "≈1% • 1.400+ recensioni"
     },
     "incremento": 16,
-    "pdf": "./checkup-centre-miodottore-phone-segreteria.pdf"
+    "pdf": "./MioDottore Phone facilita il lavoro di segreteria per Check Up Centre.pdf"
   }
 ]
