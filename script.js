@@ -1,86 +1,107 @@
-// script.js — SpinMatch Pro (full, clean, robust)
+// script.js — SpinMatch Pro (clean 2025-08-27)
 (() => {
   "use strict";
 
+  /* =========================
+   *  Costanti, selettori, helper
+   * ========================= */
   const LS_KEYS = {
     FORM: "spinmatch_pro_form_v1",
     ONBOARDING_HIDE: "spinmatch_pro_onboarding_hide_v1",
   };
 
-  // DOM
-  const form           = document.getElementById("discoveryForm");
-  const matchSummary   = document.getElementById("matchSummary");
-  const toastContainer = document.getElementById("toastContainer");
-  const progressBar    = document.getElementById("progressBar");
-
-  // Buttons
-  const newSessionBtn     = document.getElementById("newSessionBtn");
-  const runRecBtn         = document.getElementById("runRecBtn");
-  const surveySubmitBtn   = document.getElementById("surveySubmitBtn");
-  const exportPDFBtn      = document.getElementById("exportPDF");
-  const copyRecapBtn      = document.getElementById("copyRecap");
-  const emailRecapBtn     = document.getElementById("emailRecap");
-  const openPreventivoBtn = document.getElementById("openPreventivo");
-  const helpBtn           = document.getElementById("helpBtn");
-
-  // Lead status UI
-  const leadPill  = document.getElementById("leadPill");
-  const leadBadge = document.getElementById("leadBadge");
-
-  // Sidebar & sections
-  const stepLinks     = [...document.querySelectorAll(".step-link")];
-  const stepFieldsets = [...document.querySelectorAll("fieldset.step")];
-  const SCROLLER      = document.querySelector(".form-section");
-
-  // Onboarding
-  const onboardingOverlay = document.getElementById("onboardingOverlay");
-  const onboardingNext    = document.getElementById("onboardingNext");
-  const onboardingPrev    = document.getElementById("onboardingPrev");
-  const onboardingClose   = document.getElementById("onboardingClose");
-  const dontShowAgain     = document.getElementById("dontShowAgain");
-  const onboardingDots    = [...document.querySelectorAll(".onboarding .dot")];
-  let onboardingIndex = 0;
-
-  // Charts
-  let pieChart = null;
-  let sparklineChart = null;
-  let roiChart = null;
-
-  const qs = (id) => document.getElementById(id);
-  const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
-
-  const debounce = (fn, delay = 300) => {
-    let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+  const URLS = {
+    PREVENTIVO: "https://enterprise-2025.github.io/Accesso-preventivatori/",
   };
 
-  const toast = (msg = "Operazione completata", timeout = 1500) => {
+  const qs = (id) => document.getElementById(id);
+  const qsa = (sel, root = document) => [...root.querySelectorAll(sel)];
+  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+  const debounce = (fn, ms = 300) => {
+    let t;
+    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+  };
+
+  // Root
+  const form           = qs("discoveryForm");
+  const SCROLLER       = document.querySelector(".form-section");
+  const progressBar    = qs("progressBar");
+  const toastContainer = qs("toastContainer");
+  const matchSummary   = qs("matchSummary");
+
+  // Header / azioni
+  const helpBtn           = qs("helpBtn");
+  const newSessionBtn     = qs("newSessionBtn");
+  const runRecBtn         = qs("runRecBtn");
+  const surveySubmitBtn   = qs("surveySubmitBtn");
+  const exportPDFBtn      = qs("exportPDF");
+  const copyRecapBtn      = qs("copyRecap");
+  const emailRecapBtn     = qs("emailRecap");
+  const openPreventivoBtn = qs("openPreventivo"); // <a> già con href target=_blank
+
+  // Stato lead
+  const leadPill  = qs("leadPill");
+  const leadBadge = qs("leadBadge");
+
+  // Navigazione step
+  const stepLinks     = qsa(".step-link");
+  const stepFieldsets = qsa("fieldset.step");
+
+  // Onboarding
+  const onboardingOverlay = qs("onboardingOverlay");
+  const onboardingNext    = qs("onboardingNext");
+  const onboardingPrev    = qs("onboardingPrev");
+  const onboardingClose   = qs("onboardingClose");
+  const dontShowAgain     = qs("dontShowAgain");
+  const onboardingDots    = qsa(".onboarding .dot");
+  let onboardingIndex = 0;
+
+  // Modal “Presenta soluzioni”
+  const presentaBtn   = qs("presentaBtn");
+  const presentaModal = qs("presentaModal");
+  const presentaClose = qs("presentaClose");
+  const openGipoBtn   = qs("openGipo");
+  const openMioBtn    = qs("openMio");
+  let lastFocusEl = null;
+
+  // Chart refs
+  let pieChart = null, sparklineChart = null, roiChart = null;
+
+  /* =========================
+   *  UI util
+   * ========================= */
+  const toast = (msg = "Operazione completata", t = 1600) => {
     if (!toastContainer) return;
     const el = document.createElement("div");
     el.className = "toast";
     el.textContent = msg;
     toastContainer.appendChild(el);
     requestAnimationFrame(() => el.classList.add("show"));
-    setTimeout(() => {
-      el.classList.remove("show");
-      setTimeout(() => el.remove(), 250);
-    }, timeout);
+    setTimeout(() => { el.classList.remove("show"); setTimeout(() => el.remove(), 220); }, t);
   };
 
-  /* Onboarding */
+  const openExternal = (url, label = "link") => {
+    if (!url || url.startsWith("https://URL_")) { toast(`Imposta l’URL del documento (${label})`); return; }
+    const win = window.open(url, "_blank", "noopener");
+    if (!win) toast("Attiva i pop-up per aprire il link");
+  };
+
+  /* =========================
+   *  Onboarding
+   * ========================= */
   const shouldShowOnboarding = () => localStorage.getItem(LS_KEYS.ONBOARDING_HIDE) !== "1";
   const showOnboarding = () => { onboardingIndex = 0; updateOnboardingDots(); onboardingOverlay?.classList.remove("hidden"); };
   const hideOnboarding = () => { onboardingOverlay?.classList.add("hidden"); if (dontShowAgain?.checked) localStorage.setItem(LS_KEYS.ONBOARDING_HIDE, "1"); };
-  const updateOnboardingDots = () => onboardingDots.forEach((d, i) => {
-    d.classList.toggle("active", i === onboardingIndex);
-    d.setAttribute("aria-selected", i === onboardingIndex ? "true" : "false");
-  });
+  const updateOnboardingDots = () => onboardingDots.forEach((d, i) => { d.classList.toggle("active", i === onboardingIndex); d.setAttribute("aria-selected", i === onboardingIndex ? "true" : "false"); });
 
-  /* Autosave */
+  /* =========================
+   *  Autosave form
+   * ========================= */
   const doAutosave = debounce(() => {
     if (!form?.dataset.autosave) return;
     const data = Object.fromEntries(new FormData(form).entries());
     try { localStorage.setItem(LS_KEYS.FORM, JSON.stringify(data)); } catch {}
-  }, 500);
+  }, 450);
 
   const restoreAutosave = () => {
     const raw = localStorage.getItem(LS_KEYS.FORM);
@@ -89,21 +110,22 @@
       const data = JSON.parse(raw);
       Object.entries(data).forEach(([k, v]) => {
         const el = form.querySelector(`[name="${CSS.escape(k)}"]`);
-        if (el && (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement)) {
-          el.value = v;
-        }
+        if (!el) return;
+        if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) el.value = v;
       });
       initAltroToggles(true);
       toast("Dati ripristinati");
     } catch {}
   };
 
-  /* Scroll-spy + nav */
+  /* =========================
+   *  Step navigation + progress
+   * ========================= */
   function getRelativeTop(el, container) {
-    const elRect = el.getBoundingClientRect();
-    const cRect  = container.getBoundingClientRect();
-    return elRect.top - cRect.top + container.scrollTop;
+    const er = el.getBoundingClientRect(), cr = container.getBoundingClientRect();
+    return er.top - cr.top + container.scrollTop;
   }
+
   function initStepNavigation() {
     if (!SCROLLER) return;
 
@@ -115,24 +137,22 @@
         if (isActive && !fromClick) l.scrollIntoView({ block: "nearest" });
       });
     }
+
     function scrollToStep(stepId, pushHash = true) {
-      const el = document.getElementById(`step-${stepId}`);
+      const el = qs(`step-${stepId}`);
       if (!el) return;
       const y = getRelativeTop(el, SCROLLER) - 8;
       SCROLLER.scrollTo({ top: y, behavior: "smooth" });
       setActiveLink(stepId, true);
       if (pushHash) history.replaceState(null, "", `#step-${stepId}`);
     }
+
     stepLinks.forEach(btn => btn.addEventListener("click", (e) => { e.preventDefault(); scrollToStep(btn.dataset.step); }));
 
     const observer = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          const id = e.target.id.split("-")[1];
-          setActiveLink(id);
-        }
-      });
+      entries.forEach((e) => { if (e.isIntersecting) { const id = e.target.id.split("-")[1]; setActiveLink(id); } });
     }, { root: SCROLLER, rootMargin: "-10% 0px -70% 0px", threshold: 0.01 });
+
     stepFieldsets.forEach(fs => observer.observe(fs));
 
     if (location.hash?.startsWith("#step-")) {
@@ -148,40 +168,74 @@
     });
   }
 
-  /* "Altro" toggles */
+  // “Altro” toggles (select → input)
   function toggleAltroForSelect(selectEl, silent = false) {
     const targetId = selectEl.getAttribute("data-altro-target");
     if (!targetId) return;
-    const input = document.getElementById(targetId);
-    const group = document.getElementById(`grp_${targetId}`);
+    const input = qs(targetId);
+    const group = qs(`grp_${targetId}`);
     const isAltro = (selectEl.value || "").toLowerCase() === "altro";
     group?.classList.toggle("hidden", !isAltro);
     if (input) { input.disabled = !isAltro; if (!isAltro && !silent) input.value = ""; }
   }
   function initAltroToggles(silent = false) {
-    const selects = form.querySelectorAll("select[data-altro-target]");
-    selects.forEach(sel => {
+    qsa("select[data-altro-target]", form).forEach(sel => {
       toggleAltroForSelect(sel, true);
       sel.addEventListener("change", () => toggleAltroForSelect(sel, silent));
     });
   }
 
-  /* Step completion + progress */
+  // Requisiti step
   const MIN_FIELDS = {
     0: ["clinica_nome"],
     1: ["struttura_tipo", "n_medici"],
-    2: [],
+    2: [], // nessun "tutti" per Costi Nascosti
     3: ["obiettivo_6m"],
     4: ["problema_principale"],
     5: ["consapevolezza", "interesse", "budget", "timeline", "blocco"],
   };
+  // Per alcuni step basta che uno dei seguenti sia compilato
+  const ANY_FIELDS = {
+    2: ["tempo_compiti", "perdite_stimate", "area_critica", "area_critica_altro"],
+  };
+
   function stepCompleted(stepIndex) {
-    const req = MIN_FIELDS[stepIndex] || [];
-    return req.every(name => {
-      const el = form.querySelector(`[name="${name}"]`);
-      return !!el && !!(el.value || "").toString().trim();
-    });
+    const reqAll = MIN_FIELDS[stepIndex] || [];
+    const reqAny = ANY_FIELDS[stepIndex] || [];
+
+    if (reqAll.length) {
+      return reqAll.every(name => {
+        const el = form.querySelector(`[name="${name}"]`);
+        return !!el && !!(el.value || "").toString().trim();
+      });
+    }
+    if (reqAny.length) {
+      // Se "altro" è selezionato, richiede il relativo input valorizzato
+      const selectAltroPairs = [
+        ["area_critica", "area_critica_altro"]
+      ];
+      const checkAltroPair = ([selName, altName]) => {
+        const sel = form.querySelector(`[name="${selName}"]`);
+        if (!sel) return false;
+        if ((sel.value || "").toLowerCase() !== "altro") return false;
+        const alt = form.querySelector(`[name="${altName}"]`);
+        return !!alt && !!(alt.value || "").toString().trim();
+      };
+      const hasAny = reqAny.some(name => {
+        const el = form.querySelector(`[name="${name}"]`);
+        return !!el && !!(el.value || "").toString().trim();
+      });
+      // Se hanno scelto "altro" su area_critica ma non hanno scritto nulla, non è completato
+      const failsAltro = selectAltroPairs.some(pair => {
+        const sel = form.querySelector(`[name="${pair[0]}"]`);
+        return sel && (sel.value || "").toLowerCase() === "altro" && !checkAltroPair(pair);
+      });
+      return hasAny && !failsAltro;
+    }
+    // Nessun requisito dichiarato → non completato (evita flag “gratis”)
+    return false;
   }
+
   function updateProgressAndSidebar() {
     let completed = 0;
     Object.keys(MIN_FIELDS).forEach(k => { if (stepCompleted(+k)) completed++; });
@@ -195,26 +249,27 @@
     });
   }
 
-  /* Profilo clinica + SmartMatch */
+  /* =========================
+   *  Profilo & SmartMatch
+   * ========================= */
   function getClinicProfile() {
     const fd = new FormData(form);
-    const getAlt = (sel, alt) => (fd.get(sel) === "altro" ? (fd.get(alt) || "").toString().trim() : (fd.get(sel) || "")).toString().trim();
+    const getAlt = (sel, alt) =>
+      (fd.get(sel) === "altro" ? (fd.get(alt) || "").toString().trim() : (fd.get(sel) || "")).toString().trim();
 
-    const struttura_tipo = getAlt("struttura_tipo","struttura_tipo_altro").toLowerCase();
-    const gestionale     = getAlt("gestionale","gestionale_altro").toLowerCase();
-    const canale         = getAlt("prenotazioni_canale","prenotazioni_canale_altro").toLowerCase();
-
-    const n_medici = parseInt(fd.get("n_medici") || "0", 10) || 5;
-
-    const areaCritica = getAlt("area_critica","area_critica_altro").toLowerCase();
-    const obiettivo   = getAlt("obiettivo_6m","obiettivo_6m_altro").toLowerCase();
+    const struttura_tipo = getAlt("struttura_tipo", "struttura_tipo_altro").toLowerCase();
+    const gestionale     = getAlt("gestionale", "gestionale_altro").toLowerCase();
+    const canale         = getAlt("prenotazioni_canale", "prenotazioni_canale_altro").toLowerCase();
+    const n_medici       = parseInt(fd.get("n_medici") || "0", 10) || 5;
+    const areaCritica    = getAlt("area_critica", "area_critica_altro").toLowerCase();
+    const obiettivo      = getAlt("obiettivo_6m", "obiettivo_6m_altro").toLowerCase();
 
     return {
       nome: (fd.get("clinica_nome") || "").toString().trim(),
       citta: (fd.get("clinica_citta") || "").toString().trim(),
       struttura_tipo, n_medici, gestionale, canale, areaCritica, obiettivo,
       perdite: parseFloat(fd.get("perdite_stimate") || "0") || 0,
-      ore: parseFloat(fd.get("tempo_compiti") || "0") || 0
+      ore: parseFloat(fd.get("tempo_compiti") || "0") || 0,
     };
   }
 
@@ -241,10 +296,10 @@
 
   async function loadCatalog() {
     try {
-      const res = await fetch("./data/cases.json", { cache: "no-cache" });
-      if (!res.ok) throw new Error("no cases file");
+      const res = await fetch("./cases.json", { cache: "no-cache" });
+      if (!res.ok) throw new Error("no cases");
       const data = await res.json();
-      if (!Array.isArray(data) || !data.length) throw new Error("empty cases");
+      if (!Array.isArray(data) || !data.length) throw new Error("empty");
       return data;
     } catch {
       return defaultCatalog;
@@ -278,8 +333,7 @@
     for (const item of ranked) {
       if (out.length === 3) break;
       if (!usedFocus.has(item.tag.focus) || out.length >= 2) {
-        out.push(item);
-        usedFocus.add(item.tag.focus);
+        out.push(item); usedFocus.add(item.tag.focus);
       }
     }
     return out;
@@ -331,15 +385,16 @@
     };
   }
 
-  /* Render */
+  /* =========================
+   *  Render risultati
+   * ========================= */
   function renderBenefitBadges(list) {
-    const box = qs("benefitBadges");
-    if (!box) return;
+    const box = qs("benefitBadges"); if (!box) return;
     box.innerHTML = list.map(b => `<span class="badge">✔ ${b}</span>`).join("");
   }
+
   function renderCaseStudies(cases) {
-    const grid = qs("caseStudyGrid");
-    if (!grid) return;
+    const grid = qs("caseStudyGrid"); if (!grid) return;
     grid.innerHTML = "";
     cases.forEach(cs => {
       const card = document.createElement("div");
@@ -353,51 +408,52 @@
       grid.appendChild(card);
     });
   }
+
   function renderCharts(out) {
     const pieCtx = qs("pieChart")?.getContext("2d");
     if (pieCtx) {
       if (pieChart) pieChart.destroy();
       pieChart = new Chart(pieCtx, {
         type: "pie",
-        data: { labels: ["Perdite attuali", "Recuperato"],
-          datasets: [{ data: [Math.max(0, 100 - out.incremento), out.incremento] }] },
+        data: { labels: ["Perdite attuali", "Recuperato"], datasets: [{ data: [Math.max(0, 100 - out.incremento), out.incremento] }] },
         options: { responsive: true, plugins: { legend: { position: "bottom" } } }
       });
     }
+
     const sparkCtx = qs("sparklineChart")?.getContext("2d");
     if (sparkCtx) {
       if (sparklineChart) sparklineChart.destroy();
       sparklineChart = new Chart(sparkCtx, {
         type: "line",
-        data: { labels: ["T-2","T-1","Oggi","T+1","T+2"],
-          datasets: [{ data: out.serieSparkline, fill: true, tension: 0.35, pointRadius: 0,
-                       backgroundColor: 'rgba(14,165,164,0.12)' }] },
-        options: { responsive: true, plugins: { legend: { display:false } },
-                   scales:{ x:{ display:false }, y:{ display:false } },
-                   elements:{ line:{ borderWidth:2 } } }
+        data: {
+          labels: ["T-2","T-1","Oggi","T+1","T+2"],
+          datasets: [{ data: out.serieSparkline, fill: true, tension: 0.35, pointRadius: 0, backgroundColor: "rgba(14,165,164,0.12)" }]
+        },
+        options: { responsive: true, plugins: { legend: { display:false } }, scales:{ x:{ display:false }, y:{ display:false } }, elements:{ line:{ borderWidth:2 } } }
       });
     }
+
     const roiCtx = qs("roiChart")?.getContext("2d");
     if (roiCtx) {
       if (roiChart) roiChart.destroy();
       roiChart = new Chart(roiCtx, {
         type: "bar",
-        data: { labels: ["€ recuperati/mese", "Ore risparmiate/mese"],
-          datasets: [{ data: [out.euroRecuperati, out.oreRisparmiate] }] },
+        data: { labels: ["€ recuperati/mese", "Ore risparmiate/mese"], datasets: [{ data: [out.euroRecuperati, out.oreRisparmiate] }] },
         options: { responsive: true, plugins: { legend: { display:false } } }
       });
     }
   }
+
   function showResults() {
     qs("emptyResults")?.setAttribute("hidden","");
     ["proposalCard","caseStudyCard","chartsWrap","nextSteps"].forEach(id => qs(id)?.removeAttribute("hidden"));
   }
+
   function applyRecommendation(out) {
     qs("outputRaccomandazione").textContent = out.soluzione;
     renderBenefitBadges(out.benefici);
     qs("outputCasoStudio").textContent = `${out.pazientiPrima} → ${out.pazientiDopo} pazienti/mese`;
     qs("outputMiglioramento").textContent = out.miglioramento;
-
     renderCaseStudies(out.cases);
     renderCharts(out);
     showResults();
@@ -406,7 +462,9 @@
     setTimeout(() => qs("proposalCard")?.classList.remove("pulse"), 600);
   }
 
-  /* Survey → lead + next steps */
+  /* =========================
+   *  Survey → stato lead
+   * ========================= */
   function valutaSurvey() {
     const fd = new FormData(form);
     let score = 0;
@@ -423,73 +481,60 @@
     if (score >= 4) return { level: "warm",  label: "Lead tiepido 🌤️", color: "var(--lead-warm)" };
     return { level: "cold", label: "Lead freddo 🧊", color: "var(--lead-cold)" };
   }
+
   function nextStepsFor(level) {
     if (level === "hot") {
       return [
-        "Ricapitola in 2 minuti i benefici concordati e invia un preventivo **firmabile subito**.",
-        "Blocca una data d’avvio: *“Partiamo lunedì e non perdiamo le richieste della prossima settimana.”*",
-        "Concorda i primi 3 KPI e chi prepara i materiali (loghi, indirizzi, servizi)."
+        "Ricapitola i benefici concordati e invia un preventivo **firmabile subito**.",
+        "Blocca una data d’avvio: *“Partiamo lunedì.”*",
+        "Concorda 3 KPI e chi prepara i materiali."
       ];
     }
     if (level === "warm") {
       return [
-        "Fai una **demo mirata** su 2–3 casi che li toccano da vicino (no generici).",
-        "Porta una **mini-stima ROI**: un numero memorabile (es. *‘~+18% pazienti in 90 giorni’*).",
-        "Coinvolgi il decisore: proponi un **pilot di 30 giorni** con obiettivo chiaro."
+        "Fai una **demo mirata** su 2–3 casi simili.",
+        "Porta una **mini-stima ROI** (es. *‘~+18% in 90 giorni’*).",
+        "Proponi **pilot 30 giorni** con obiettivo chiaro."
       ];
     }
     return [
-      "Non forzare. Invia un contenuto **utile** (case study gemello o guida pratica) e chiedi feedback tra 2 settimane.",
-      "Proponi un **micro-impegno**: audit di 15 minuti su agenda o no-show, senza parlare di prezzo.",
-      "Resta presente: una nota LinkedIn o email breve con un consiglio pratico vale più di 3 follow-up standard."
+      "Invia un contenuto **utile** (case study gemello/guida) e chiedi feedback.",
+      "Proponi un **micro-audit** di 15 minuti (agenda/no-show).",
+      "Resta presente con un consiglio pratico via mail/LinkedIn."
     ];
   }
+
   function renderNextSteps(status) {
     const box = qs("nextStepsList"); if (!box) return;
     box.innerHTML = "";
-    nextStepsFor(status.level).forEach(t => {
-      const p = document.createElement("p"); p.innerHTML = `• ${t}`; box.appendChild(p);
-    });
+    nextStepsFor(status.level).forEach(t => { const p = document.createElement("p"); p.innerHTML = `• ${t}`; box.appendChild(p); });
   }
+
   function applyLeadFeedback(status) {
-    if (leadPill) {
-      leadPill.textContent = `• ${status.label}`;
-      leadPill.style.borderColor = status.color;
-      leadPill.style.color = status.color;
-      leadPill.setAttribute("aria-label", `Stato lead: ${status.label}`);
-    }
-    if (leadBadge) {
-      leadBadge.textContent = status.label;
-      leadBadge.style.background = "rgba(0,0,0,0.03)";
-      leadBadge.style.borderColor = status.color;
-      leadBadge.style.color = status.color;
-    }
+    if (leadPill) { leadPill.textContent = `• ${status.label}`; leadPill.style.borderColor = status.color; leadPill.style.color = status.color; }
+    if (leadBadge) { leadBadge.textContent = status.label; leadBadge.style.background = "rgba(0,0,0,0.03)"; leadBadge.style.borderColor = status.color; leadBadge.style.color = status.color; }
     matchSummary.querySelector(".survey-result")?.remove();
     const div = document.createElement("div");
-    div.className = "survey-result";
-    div.style.borderLeftColor = status.color;
-    div.textContent = `Valutazione: ${status.label}`;
+    div.className = "survey-result"; div.style.borderLeftColor = status.color; div.textContent = `Valutazione: ${status.label}`;
     matchSummary.appendChild(div);
-
     renderNextSteps(status);
     qs("nextSteps")?.removeAttribute("hidden");
   }
 
-  /* PDF export */
+  /* =========================
+   *  Export PDF & recap
+   * ========================= */
   async function exportPDF() {
     try {
       const { jsPDF } = window.jspdf || {};
       if (!jsPDF) return toast("Errore: jsPDF non caricato");
 
       const temp = document.createElement("div");
-      temp.style.padding = "18px";
-      temp.style.background = "#ffffff";
-      temp.style.color = "#111827";
-      temp.style.width = "980px";
-      temp.style.fontFamily = "Inter, Arial, sans-serif";
+      temp.style.padding = "18px"; temp.style.background = "#ffffff"; temp.style.color = "#111827";
+      temp.style.width = "980px"; temp.style.fontFamily = "Inter, Arial, sans-serif";
 
       const headerClone = document.querySelector(".header")?.cloneNode(true);
-      headerClone?.querySelectorAll("button")?.forEach(b => b.remove());
+      headerClone?.querySelectorAll("button,a")?.forEach(b => b.remove());
       if (headerClone) temp.appendChild(headerClone);
 
       const summary = document.createElement("div");
@@ -506,25 +551,21 @@
         ["Referente", fd.get("referente_nome")],
         ["Ruolo", fd.get("referente_ruolo")],
         ["Mail", fd.get("referente_mail")],
-
         ["Tipo struttura", getVal("struttura_tipo","struttura_tipo_altro")],
         ["N. medici", fd.get("n_medici")],
         ["Gestionale", getVal("gestionale","gestionale_altro")],
         ["Canale prenotazioni", getVal("prenotazioni_canale","prenotazioni_canale_altro")],
-
         ["Tempo compiti (h/g)", fd.get("tempo_compiti")],
         ["Perdite stimate (€/mese)", fd.get("perdite_stimate")],
         ["Area critica", getVal("area_critica","area_critica_altro")],
-
         ["Obiettivo 6 mesi", getVal("obiettivo_6m","obiettivo_6m_altro")],
         ["Miglioramento più utile", getVal("miglioramento_top","miglioramento_top_altro")],
-
         ["Problema principale", getVal("problema_principale","problema_principale_altro")],
         ["Implicazioni", getVal("implicazioni","implicazioni_altro")],
         ["Situazione ideale", getVal("situazione_ideale","situazione_ideale_altro")],
-
         ["Note iniziali", fd.get("note_iniziali")]
       ].filter(r => r[1]);
+
       const table = document.createElement("table");
       table.style.width = "100%"; table.style.borderCollapse = "collapse"; table.style.fontSize = "12px";
       rows.forEach(([k,v]) => {
@@ -535,7 +576,8 @@
         td.style.padding="6px 8px"; th.style.border = td.style.border = "1px solid #e5e7eb";
         tr.append(th,td); table.appendChild(tr);
       });
-      summary.appendChild(table); temp.appendChild(summary);
+      summary.appendChild(table);
+      temp.appendChild(summary);
 
       const resClone = matchSummary.cloneNode(true);
       temp.appendChild(resClone);
@@ -569,42 +611,49 @@
           if (sY < canvas.height) pdf.addPage();
         }
       }
-      const filename = `SpinMatchPro_${(new Date()).toISOString().slice(0,10)}.pdf`;
-      pdf.save(filename);
+
+      pdf.save(`SpinMatchPro_${(new Date()).toISOString().slice(0,10)}.pdf`);
       toast("PDF esportato");
-    } catch (err) { console.error(err); toast("Impossibile esportare il PDF"); }
+    } catch (err) {
+      console.error(err);
+      toast("Impossibile esportare il PDF");
+    }
   }
 
-  /* Recap */
   function buildRecapText() {
-    const p = getClinicProfile();
-    const status = document.querySelector(".survey-result")?.textContent || "Non valutato";
-    const rec   = qs("outputRaccomandazione")?.textContent || "-";
-    const mig   = qs("outputMiglioramento")?.textContent || "-";
-    const cs    = qs("outputCasoStudio")?.textContent || "-";
+    const p   = getClinicProfile();
+    const st  = document.querySelector(".survey-result")?.textContent || "Non valutato";
+    const rec = qs("outputRaccomandazione")?.textContent || "-";
+    const mig = qs("outputMiglioramento")?.textContent || "-";
+    const cs  = qs("outputCasoStudio")?.textContent || "-";
     return [
       `Riepilogo SpinMatch Pro`,
       `Clinica: ${p.nome || "-"}`,
       `Città: ${p.citta || "-"}`,
-      `Stato lead: ${status}`,
+      `Stato lead: ${st}`,
       `Proposta: ${rec}`,
       `Miglioramento stimato: ${mig}`,
       `Stima pazienti: ${cs}`
     ].join("\n");
   }
+
   async function copyRecap() {
     try { await navigator.clipboard.writeText(buildRecapText()); toast("Recap copiato"); }
     catch { toast("Impossibile copiare il recap"); }
   }
+
   function emailRecap() {
     const subject = encodeURIComponent("Riepilogo incontro — SpinMatch Pro");
     const body = encodeURIComponent(buildRecapText());
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   }
 
-  /* Reset */
+  /* =========================
+   *  Reset sessione
+   * ========================= */
   function resetSessione() {
     try { form?.reset(); localStorage.removeItem(LS_KEYS.FORM); } catch {}
+
     ["outputRaccomandazione","outputCasoStudio","outputMiglioramento","benefitBadges"]
       .forEach(id => { const el = qs(id); if (el) el.textContent = ""; });
     qs("caseStudyGrid")?.replaceChildren();
@@ -626,10 +675,36 @@
     toast("Nuova sessione pronta");
   }
 
-  /* Events */
+  /* =========================
+   *  Modal “Presenta soluzioni”
+   * ========================= */
+  function openPresenta() {
+    if (!presentaModal) return;
+    lastFocusEl = document.activeElement;
+    presentaModal.classList.remove("hidden");
+    presentaClose?.focus();
+  }
+  function closePresenta() {
+    if (!presentaModal) return;
+    presentaModal.classList.add("hidden");
+    if (lastFocusEl && lastFocusEl.focus) lastFocusEl.focus();
+  }
+  function bindPresenta() {
+    if (!presentaModal) return;
+    presentaBtn?.addEventListener("click", openPresenta);
+    presentaClose?.addEventListener("click", closePresenta);
+    presentaModal.addEventListener("click", (e) => { if (e.target === presentaModal) closePresenta(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !presentaModal.classList.contains("hidden")) closePresenta(); });
+
+    openGipoBtn?.addEventListener("click", () => openExternal(openGipoBtn.dataset.docUrl, "GipoNext"));
+    openMioBtn?.addEventListener("click",  () => openExternal(openMioBtn.dataset.docUrl,  "MioDottore"));
+  }
+
+  /* =========================
+   *  Event binding
+   * ========================= */
   function bindEvents(catalog) {
     ["input","change"].forEach(ev => form?.addEventListener(ev, () => { doAutosave(); updateProgressAndSidebar(); }));
-
     initAltroToggles();
     updateProgressAndSidebar();
 
@@ -651,8 +726,11 @@
     copyRecapBtn?.addEventListener("click", copyRecap);
     emailRecapBtn?.addEventListener("click", emailRecap);
 
-    openPreventivoBtn?.addEventListener("click", () => {
-      toast("Apro il preventivo…");
+    // <a> già con href. Se per errore venisse rimosso, apro quello di default.
+    openPreventivoBtn?.addEventListener("click", (e) => {
+      const href = openPreventivoBtn.getAttribute("href");
+      if (!href) { e.preventDefault(); openExternal(URLS.PREVENTIVO, "Preventivo"); }
+      else toast("Apro il preventivo…");
     });
 
     helpBtn?.addEventListener("click", showOnboarding);
@@ -660,9 +738,13 @@
     onboardingNext?.addEventListener("click", () => { onboardingIndex = Math.min(4, onboardingIndex + 1); updateOnboardingDots(); });
     onboardingPrev?.addEventListener("click", () => { onboardingIndex = Math.max(0, onboardingIndex - 1); updateOnboardingDots(); });
     onboardingDots.forEach((dot, i) => dot.addEventListener("click", () => { onboardingIndex = i; updateOnboardingDots(); }));
+
+    bindPresenta();
   }
 
-  /* Init */
+  /* =========================
+   *  Init
+   * ========================= */
   async function init() {
     restoreAutosave();
     initStepNavigation();
@@ -671,5 +753,6 @@
     if (shouldShowOnboarding()) setTimeout(showOnboarding, 300);
     stepFieldsets.forEach(fs => fs.classList.add("fade-in"));
   }
+
   document.addEventListener("DOMContentLoaded", init);
 })();
