@@ -13,7 +13,7 @@
   <!-- CSS -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Vendor (in ordine, tutti defer per performance) -->
+  <!-- Vendor (tutti defer per performance) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
@@ -497,8 +497,8 @@
       <div class="modal-body">
         <!-- Scelta -->
         <div id="presentaChooser" class="actions-row">
-          <!-- Se li metti nella cartella /presentazioni/ rinomina i file così: -->
-          <!-- /presentazioni/giponext.pptx e /presentazioni/miodottore-crm.pptx -->
+          <!-- Metti i PDF nella cartella /presentazioni/ con questi nomi: -->
+          <!-- /presentazioni/giponext.pdf e /presentazioni/miodottore-crm.pdf -->
           <button id="openGipo" class="btn-primary" type="button" data-doc-url="presentazioni/giponext.pdf">
             <i data-lucide="file-text" aria-hidden="true"></i> GipoNext
           </button>
@@ -519,6 +519,9 @@
     <p>SpinMatch Pro — Discovery, raccomandazione e chiusura.</p>
   </footer>
 
+  <!-- Config opzionale: disattiva il fetch di cases.json per evitare 404 -->
+  <script>window.SPINMATCH_CASES_URL = null;</script>
+
   <!-- App script -->
   <script src="script.js" defer></script>
   <script>
@@ -531,5 +534,4 @@
   </script>
 </body>
 </html>
-
 
