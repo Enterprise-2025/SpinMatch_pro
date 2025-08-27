@@ -14,13 +14,10 @@
     PREVENTIVO: "https://enterprise-2025.github.io/Accesso-preventivatori/",
   };
 
-  const qs = (id) => document.getElementById(id);
+  const qs  = (id) => document.getElementById(id);
   const qsa = (sel, root = document) => [...root.querySelectorAll(sel)];
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
-  const debounce = (fn, ms = 300) => {
-    let t;
-    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
-  };
+  const debounce = (fn, ms = 300) => { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); }; };
 
   // Root
   const form           = qs("discoveryForm");
@@ -56,12 +53,18 @@
   const onboardingDots    = qsa(".onboarding .dot");
   let onboardingIndex = 0;
 
-  // Modal “Presenta soluzioni”
-  const presentaBtn   = qs("presentaBtn");
-  const presentaModal = qs("presentaModal");
-  const presentaClose = qs("presentaClose");
-  const openGipoBtn   = qs("openGipo");
-  const openMioBtn    = qs("openMio");
+  // Modal “Presenta soluzioni” + viewer
+  const presentaBtn     = qs("presentaBtn");
+  const presentaModal   = qs("presentaModal");
+  const presentaClose   = qs("presentaClose");
+  const presentaBack    = qs("presentaBack");
+  const openGipoBtn     = qs("openGipo");
+  const openMioBtn      = qs("openMio");
+  const chooser         = qs("presentaChooser");
+  const viewerWrap      = qs("docViewer");
+  const frame           = qs("docFrame");
+  const openInNew       = qs("presentaOpenInNew");
+  const presentaTitleEl = qs("presentaTitle");
   let lastFocusEl = null;
 
   // Chart refs
@@ -73,8 +76,7 @@
   const toast = (msg = "Operazione completata", t = 1600) => {
     if (!toastContainer) return;
     const el = document.createElement("div");
-    el.className = "toast";
-    el.textContent = msg;
+    el.className = "toast"; el.textContent = msg;
     toastContainer.appendChild(el);
     requestAnimationFrame(() => el.classList.add("show"));
     setTimeout(() => { el.classList.remove("show"); setTimeout(() => el.remove(), 220); }, t);
@@ -110,8 +112,7 @@
       const data = JSON.parse(raw);
       Object.entries(data).forEach(([k, v]) => {
         const el = form.querySelector(`[name="${CSS.escape(k)}"]`);
-        if (!el) return;
-        if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) el.value = v;
+        if (el && (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement)) el.value = v;
       });
       initAltroToggles(true);
       toast("Dati ripristinati");
@@ -189,12 +190,12 @@
   const MIN_FIELDS = {
     0: ["clinica_nome"],
     1: ["struttura_tipo", "n_medici"],
-    2: [], // nessun "tutti" per Costi Nascosti
+    2: [], // Costi Nascosti: nessun “tutti”
     3: ["obiettivo_6m"],
     4: ["problema_principale"],
     5: ["consapevolezza", "interesse", "budget", "timeline", "blocco"],
   };
-  // Per alcuni step basta che uno dei seguenti sia compilato
+  // Per alcuni step basta “almeno uno”
   const ANY_FIELDS = {
     2: ["tempo_compiti", "perdite_stimate", "area_critica", "area_critica_altro"],
   };
@@ -210,29 +211,22 @@
       });
     }
     if (reqAny.length) {
-      // Se "altro" è selezionato, richiede il relativo input valorizzato
-      const selectAltroPairs = [
-        ["area_critica", "area_critica_altro"]
-      ];
-      const checkAltroPair = ([selName, altName]) => {
-        const sel = form.querySelector(`[name="${selName}"]`);
-        if (!sel) return false;
-        if ((sel.value || "").toLowerCase() !== "altro") return false;
-        const alt = form.querySelector(`[name="${altName}"]`);
-        return !!alt && !!(alt.value || "").toString().trim();
-      };
+      // Se “Altro” è selezionato, richiede il relativo input pieno
+      const selectAltroPairs = [["area_critica", "area_critica_altro"]];
       const hasAny = reqAny.some(name => {
         const el = form.querySelector(`[name="${name}"]`);
         return !!el && !!(el.value || "").toString().trim();
       });
-      // Se hanno scelto "altro" su area_critica ma non hanno scritto nulla, non è completato
-      const failsAltro = selectAltroPairs.some(pair => {
-        const sel = form.querySelector(`[name="${pair[0]}"]`);
-        return sel && (sel.value || "").toLowerCase() === "altro" && !checkAltroPair(pair);
+      const failsAltro = selectAltroPairs.some(([selName, altName]) => {
+        const sel = form.querySelector(`[name="${selName}"]`);
+        if (!sel) return false;
+        if ((sel.value || "").toLowerCase() !== "altro") return false;
+        const alt = form.querySelector(`[name="${altName}"]`);
+        return !alt || !(alt.value || "").toString().trim();
       });
       return hasAny && !failsAltro;
     }
-    // Nessun requisito dichiarato → non completato (evita flag “gratis”)
+    // Nessun requisito → non completato (evita flag “gratis”)
     return false;
   }
 
@@ -273,6 +267,7 @@
     };
   }
 
+  // Catalogo (fallback)
   const defaultCatalog = [
     { nome: "Poliambulatorio Iris", contesto: "Poliambulatorio multi-specialistico, 12 medici",
       tag: { size: "m", canale: "sito web", focus: "prenotazioni", gestionale:"gipo" },
@@ -318,24 +313,16 @@
                 : (profile.obiettivo.includes("pazient") || profile.obiettivo.includes("visib")) ? "visibilità"
                 : "prenotazioni";
 
-    function score(item) {
-      let s = 0;
-      if (item.tag.size === size) s += 2;
-      if (item.tag.canale === canaleKey) s += 2;
-      if (item.tag.gestionale === gestKey) s += 1;
-      if (item.tag.focus === focus) s += 2;
-      return s;
-    }
+    const score = (item) => (
+      (item.tag.size === size ? 2 : 0) +
+      (item.tag.canale === canaleKey ? 2 : 0) +
+      (item.tag.gestionale === gestKey ? 1 : 0) +
+      (item.tag.focus === focus ? 2 : 0)
+    );
 
     const ranked = catalog.map(x => ({ ...x, _s: score(x) })).sort((a,b) => b._s - a._s);
-    const out = [];
-    const usedFocus = new Set();
-    for (const item of ranked) {
-      if (out.length === 3) break;
-      if (!usedFocus.has(item.tag.focus) || out.length >= 2) {
-        out.push(item); usedFocus.add(item.tag.focus);
-      }
-    }
+    const out = []; const usedFocus = new Set();
+    for (const item of ranked) { if (out.length === 3) break; if (!usedFocus.has(item.tag.focus) || out.length >= 2) { out.push(item); usedFocus.add(item.tag.focus); } }
     return out;
   }
 
@@ -350,9 +337,7 @@
     ), 8, 35);
 
     const usaCRM = profile.gestionale.includes("gipo") || profile.gestionale.includes("crm");
-    const soluzione = usaCRM
-      ? "CRM + Visibilità online + Agenda integrata"
-      : "Visibilità online + Agenda integrata";
+    const soluzione = usaCRM ? "CRM + Visibilità online + Agenda integrata" : "Visibilità online + Agenda integrata";
 
     const pazientiPrima = Math.max(100, profile.n_medici * 90);
     const pazientiDopo  = Math.round(pazientiPrima * (1 + inc / 100));
@@ -457,7 +442,6 @@
     renderCaseStudies(out.cases);
     renderCharts(out);
     showResults();
-
     qs("proposalCard")?.classList.add("pulse");
     setTimeout(() => qs("proposalCard")?.classList.remove("pulse"), 600);
   }
@@ -511,8 +495,8 @@
   }
 
   function applyLeadFeedback(status) {
-    if (leadPill) { leadPill.textContent = `• ${status.label}`; leadPill.style.borderColor = status.color; leadPill.style.color = status.color; }
-    if (leadBadge) { leadBadge.textContent = status.label; leadBadge.style.background = "rgba(0,0,0,0.03)"; leadBadge.style.borderColor = status.color; leadBadge.style.color = status.color; }
+    if (leadPill)  { leadPill.textContent = `• ${status.label}`; leadPill.style.borderColor = status.color; leadPill.style.color = status.color; }
+    if (leadBadge) { leadBadge.textContent = status.label;        leadBadge.style.background = "rgba(0,0,0,0.03)"; leadBadge.style.borderColor = status.color; leadBadge.style.color = status.color; }
     matchSummary.querySelector(".survey-result")?.remove();
     const div = document.createElement("div");
     div.className = "survey-result"; div.style.borderLeftColor = status.color; div.textContent = `Valutazione: ${status.label}`;
@@ -654,8 +638,7 @@
   function resetSessione() {
     try { form?.reset(); localStorage.removeItem(LS_KEYS.FORM); } catch {}
 
-    ["outputRaccomandazione","outputCasoStudio","outputMiglioramento","benefitBadges"]
-      .forEach(id => { const el = qs(id); if (el) el.textContent = ""; });
+    ["outputRaccomandazione","outputCasoStudio","outputMiglioramento","benefitBadges"].forEach(id => { const el = qs(id); if (el) el.textContent = ""; });
     qs("caseStudyGrid")?.replaceChildren();
 
     if (pieChart) { pieChart.destroy(); pieChart = null; }
@@ -676,28 +659,59 @@
   }
 
   /* =========================
-   *  Modal “Presenta soluzioni”
+   *  Modal “Presenta soluzioni” con viewer
    * ========================= */
+  const toAbsUrl    = (u) => new URL(u, window.location.href).href;
+  const officeEmbed = (u) => `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(u)}&wdAr=1.7777777777777777`;
+
+  function openDocViewer(docUrl, title){
+    if (!docUrl) return toast("URL documento mancante");
+    const abs   = toAbsUrl(docUrl);
+    const embed = officeEmbed(abs);
+
+    chooser?.classList.add("hidden");
+    viewerWrap?.classList.remove("hidden");
+    presentaBack?.classList.remove("hidden");
+    openInNew?.classList.remove("hidden");
+    if (presentaTitleEl) presentaTitleEl.textContent = title || "Presentazione";
+    if (openInNew) openInNew.href = embed;
+    if (frame) frame.src = embed;
+  }
+
+  function backToChooser(){
+    if (frame) frame.src = "";
+    viewerWrap?.classList.add("hidden");
+    chooser?.classList.remove("hidden");
+    presentaBack?.classList.add("hidden");
+    openInNew?.classList.add("hidden");
+    if (presentaTitleEl) presentaTitleEl.textContent = "Presentazioni rapide";
+  }
+
   function openPresenta() {
     if (!presentaModal) return;
     lastFocusEl = document.activeElement;
+    backToChooser();
     presentaModal.classList.remove("hidden");
     presentaClose?.focus();
   }
+
   function closePresenta() {
     if (!presentaModal) return;
+    if (frame) frame.src = "";
     presentaModal.classList.add("hidden");
     if (lastFocusEl && lastFocusEl.focus) lastFocusEl.focus();
   }
+
   function bindPresenta() {
     if (!presentaModal) return;
     presentaBtn?.addEventListener("click", openPresenta);
     presentaClose?.addEventListener("click", closePresenta);
+    presentaBack?.addEventListener("click", backToChooser);
     presentaModal.addEventListener("click", (e) => { if (e.target === presentaModal) closePresenta(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !presentaModal.classList.contains("hidden")) closePresenta(); });
 
-    openGipoBtn?.addEventListener("click", () => openExternal(openGipoBtn.dataset.docUrl, "GipoNext"));
-    openMioBtn?.addEventListener("click",  () => openExternal(openMioBtn.dataset.docUrl,  "MioDottore"));
+    openGipoBtn?.addEventListener("click", () => openDocViewer(openGipoBtn.dataset.docUrl, "GipoNext"));
+    openMioBtn?.addEventListener("click", () => openDocViewer(openMioBtn.dataset.docUrl, "MioDottore"));
   }
 
   /* =========================
@@ -726,7 +740,7 @@
     copyRecapBtn?.addEventListener("click", copyRecap);
     emailRecapBtn?.addEventListener("click", emailRecap);
 
-    // <a> già con href. Se per errore venisse rimosso, apro quello di default.
+    // <a> già con href. Se venisse rimosso, apro quello di default.
     openPreventivoBtn?.addEventListener("click", (e) => {
       const href = openPreventivoBtn.getAttribute("href");
       if (!href) { e.preventDefault(); openExternal(URLS.PREVENTIVO, "Preventivo"); }
