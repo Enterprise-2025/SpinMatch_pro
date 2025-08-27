@@ -13,7 +13,7 @@
   <!-- CSS -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Vendor (defer per performance) -->
+  <!-- Vendor (caricati in defer per performance) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
@@ -25,18 +25,21 @@
   <!-- HEADER -->
   <header class="header" role="banner" aria-label="Intestazione applicazione">
     <div class="header-left">
-      <i data-lucide="target"></i>
-      <h1 class="app-title">QPWON SpinMatch <span class="pro-badge">PRO</span></h1>
+      <i data-lucide="target" aria-hidden="true"></i>
+      <h1 class="app-title">
+        QPWON SpinMatch <span class="pro-badge">PRO</span>
+      </h1>
       <span id="leadPill" class="lead-pill" role="status" aria-live="polite" aria-label="Stato lead">
         • Nessuna valutazione
       </span>
     </div>
+
     <div class="header-right">
       <button id="helpBtn" class="btn-tertiary" type="button" aria-label="Apri guida rapida">
-        <i data-lucide="info"></i> Guida
+        <i data-lucide="info" aria-hidden="true"></i> Guida
       </button>
       <button id="newSessionBtn" class="btn-secondary" type="button" aria-label="Avvia nuova sessione">
-        <i data-lucide="refresh-ccw"></i> Nuova Sessione
+        <i data-lucide="refresh-ccw" aria-hidden="true"></i> Nuova Sessione
       </button>
     </div>
   </header>
@@ -62,7 +65,7 @@
       </nav>
     </aside>
 
-    <!-- FORM -->
+    <!-- FORM / DISCOVERY -->
     <section class="form-section" aria-labelledby="discoveryTitle">
       <h2 id="discoveryTitle" class="sr-only">Modulo discovery</h2>
 
@@ -117,9 +120,7 @@
           <div class="form-grid">
             <div class="form-group">
               <label for="struttura_tipo">Tipo di struttura</label>
-              <select id="struttura_tipo" name="struttura_tipo"
-                      data-altro-target="struttura_tipo_altro" aria-controls="struttura_tipo_altro"
-                      aria-describedby="altroHint1">
+              <select id="struttura_tipo" name="struttura_tipo" data-altro-target="struttura_tipo_altro" aria-controls="struttura_tipo_altro" aria-describedby="altroHint1">
                 <option value="">-- Seleziona --</option>
                 <option>Poliambulatorio</option>
                 <option>Centro medico</option>
@@ -140,8 +141,7 @@
 
             <div class="form-group">
               <label for="gestionale">Gestionale in uso</label>
-              <select id="gestionale" name="gestionale"
-                      data-altro-target="gestionale_altro" aria-controls="gestionale_altro" aria-describedby="altroHint2">
+              <select id="gestionale" name="gestionale" data-altro-target="gestionale_altro" aria-controls="gestionale_altro" aria-describedby="altroHint2">
                 <option value="">-- Seleziona --</option>
                 <option>Nessuno</option>
                 <option>GipoNext</option>
@@ -157,8 +157,7 @@
 
             <div class="form-group">
               <label for="prenotazioni_canale">Canale principale di prenotazione</label>
-              <select id="prenotazioni_canale" name="prenotazioni_canale"
-                      data-altro-target="prenotazioni_canale_altro" aria-controls="prenotazioni_canale_altro" aria-describedby="altroHint3">
+              <select id="prenotazioni_canale" name="prenotazioni_canale" data-altro-target="prenotazioni_canale_altro" aria-controls="prenotazioni_canale_altro" aria-describedby="altroHint3">
                 <option value="">-- Seleziona --</option>
                 <option>Telefono</option>
                 <option>Sito web</option>
@@ -189,8 +188,7 @@
             </div>
             <div class="form-group">
               <label for="area_critica">Area più critica</label>
-              <select id="area_critica" name="area_critica"
-                      data-altro-target="area_critica_altro" aria-controls="area_critica_altro">
+              <select id="area_critica" name="area_critica" data-altro-target="area_critica_altro" aria-controls="area_critica_altro">
                 <option value="">-- Seleziona --</option>
                 <option>No-show</option>
                 <option>Overbooking/Agende</option>
@@ -212,8 +210,7 @@
           <div class="form-grid">
             <div class="form-group">
               <label for="obiettivo_6m">Obiettivo 6 mesi</label>
-              <select id="obiettivo_6m" name="obiettivo_6m"
-                      data-altro-target="obiettivo_6m_altro" aria-controls="obiettivo_6m_altro">
+              <select id="obiettivo_6m" name="obiettivo_6m" data-altro-target="obiettivo_6m_altro" aria-controls="obiettivo_6m_altro">
                 <option value="">-- Seleziona --</option>
                 <option>Aumentare pazienti</option>
                 <option>Ottimizzare processi</option>
@@ -228,8 +225,7 @@
 
             <div class="form-group">
               <label for="miglioramento_top">Miglioramento più utile</label>
-              <select id="miglioramento_top" name="miglioramento_top"
-                      data-altro-target="miglioramento_top_altro" aria-controls="miglioramento_top_altro">
+              <select id="miglioramento_top" name="miglioramento_top" data-altro-target="miglioramento_top_altro" aria-controls="miglioramento_top_altro">
                 <option value="">-- Seleziona --</option>
                 <option>Automatizzare prenotazioni</option>
                 <option>CRM follow-up</option>
@@ -251,8 +247,7 @@
           <div class="form-grid">
             <div class="form-group">
               <label for="problema_principale">Problema principale oggi</label>
-              <select id="problema_principale" name="problema_principale"
-                      data-altro-target="problema_principale_altro" aria-controls="problema_principale_altro">
+              <select id="problema_principale" name="problema_principale" data-altro-target="problema_principale_altro" aria-controls="problema_principale_altro">
                 <option value="">-- Seleziona --</option>
                 <option>Agende caotiche</option>
                 <option>No-show alto</option>
@@ -267,8 +262,7 @@
 
             <div class="form-group">
               <label for="implicazioni">Implicazioni principali</label>
-              <select id="implicazioni" name="implicazioni"
-                      data-altro-target="implicazioni_altro" aria-controls="implicazioni_altro">
+              <select id="implicazioni" name="implicazioni" data-altro-target="implicazioni_altro" aria-controls="implicazioni_altro">
                 <option value="">-- Seleziona --</option>
                 <option>Perdite economiche</option>
                 <option>Clienti insoddisfatti</option>
@@ -283,8 +277,7 @@
 
             <div class="form-group">
               <label for="situazione_ideale">Situazione ideale</label>
-              <select id="situazione_ideale" name="situazione_ideale"
-                      data-altro-target="situazione_ideale_altro" aria-controls="situazione_ideale_altro">
+              <select id="situazione_ideale" name="situazione_ideale" data-altro-target="situazione_ideale_altro" aria-controls="situazione_ideale_altro">
                 <option value="">-- Seleziona --</option>
                 <option>Sistema unico integrato</option>
                 <option>Promemoria automatici</option>
@@ -298,9 +291,14 @@
             </div>
           </div>
 
+          <!-- Azioni: Presenta soluzioni (nuovo) + Match -->
           <div class="actions-row">
+            <button type="button" id="presentaBtn" class="btn-secondary" aria-label="Apri presentazioni">
+              <i data-lucide="book-open" aria-hidden="true"></i> Presenta soluzioni
+            </button>
+
             <button type="button" id="runRecBtn" class="btn-primary" aria-label="Genera proposta">
-              <i data-lucide="sparkles"></i> Match
+              <i data-lucide="sparkles" aria-hidden="true"></i> Match
             </button>
           </div>
         </fieldset>
@@ -352,8 +350,7 @@
 
             <div class="form-group">
               <label for="survey-blocco">Qual è il principale ostacolo a procedere?</label>
-              <select id="survey-blocco" name="blocco" required
-                      data-altro-target="survey_blocco_altro" aria-controls="survey_blocco_altro">
+              <select id="survey-blocco" name="blocco" required data-altro-target="survey_blocco_altro" aria-controls="survey_blocco_altro">
                 <option value="">-- Seleziona --</option>
                 <option value="direzione">Decisione direzione</option>
                 <option value="roi">Dubbi sul ROI</option>
@@ -369,7 +366,7 @@
 
           <div class="actions-row">
             <button type="button" id="surveySubmitBtn" class="btn-primary" aria-label="Valuta lead">
-              <i data-lucide="check-circle"></i> Valuta lead
+              <i data-lucide="check-circle" aria-hidden="true"></i> Valuta lead
             </button>
           </div>
         </fieldset>
@@ -440,9 +437,15 @@
         <button id="emailRecap" class="btn-secondary" type="button" aria-label="Invia recap via email">
           <i data-lucide="mail"></i> Email recap
         </button>
-        <button id="openPreventivo" class="btn-secondary" type="button" aria-label="Vai al preventivo">
-          <i data-lucide="file-signature"></i> Vai al preventivo
-        </button>
+
+        <!-- Vai al preventivo: ora è un link che apre in nuova scheda -->
+        <a id="openPreventivo"
+           class="btn-secondary"
+           href="https://enterprise-2025.github.io/Accesso-preventivatori/"
+           target="_blank" rel="noopener noreferrer" role="button"
+           aria-label="Vai al preventivo">
+          <i data-lucide="file-signature" aria-hidden="true"></i> Vai al preventivo
+        </a>
       </div>
     </aside>
   </div>
@@ -480,16 +483,42 @@
     </div>
   </div>
 
+  <!-- MODAL: Presenta soluzioni -->
+  <div id="presentaModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="presentaTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="presentaTitle">Presentazioni rapide</h3>
+        <button id="presentaClose" class="btn-tertiary" type="button" aria-label="Chiudi popup">✕</button>
+      </div>
+      <div class="modal-body">
+        <p>Scegli cosa mostrare:</p>
+        <div class="actions-row">
+          <!-- Inserisci qui gli URL reali dei documenti di presentazione -->
+          <button id="openGipo" class="btn-primary" type="button" data-doc-url="https://URL_PRESENTAZIONE_GIPONEXT">
+            <i data-lucide="file-text" aria-hidden="true"></i> GipoNext
+          </button>
+          <button id="openMio" class="btn-primary" type="button" data-doc-url="https://URL_PRESENTAZIONE_MIODOTTORE">
+            <i data-lucide="file-text" aria-hidden="true"></i> MioDottore
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer class="sr-only" role="contentinfo">
     <p>SpinMatch Pro — Discovery, raccomandazione e chiusura.</p>
   </footer>
 
+  <!-- App script -->
   <script src="script.js" defer></script>
   <script>
-    window.addEventListener('DOMContentLoaded', () => { try { lucide.createIcons(); } catch(e){} });
+    window.addEventListener('DOMContentLoaded', () => {
+      try { lucide.createIcons(); } catch (e) {}
+    });
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./service-worker.js').catch(() => {});
     }
   </script>
 </body>
 </html>
+
