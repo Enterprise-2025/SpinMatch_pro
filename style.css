@@ -79,14 +79,15 @@ body {
 .progress-wrap{ height:6px; background:#E9EEF5; }
 .progress-bar{ height:6px; background: linear-gradient(90deg, #99F6E4, #0EA5A4); width:0%; transition: width .25s ease; }
 
-/* Buttons */
+/* Buttons (validi anche per <a class="btn-*> ) */
 .btn-primary, .btn-secondary, .btn-tertiary{
   font-weight:700; font-size:.95rem;
   padding:10px 14px; border-radius:12px;
   border:1px solid transparent; cursor:pointer;
   transition: transform .06s ease, box-shadow .2s ease,
               background .2s ease, color .2s ease, border-color .2s ease;
-  display:inline-flex; align-items:center; gap:8px;
+  display:inline-flex; align-items:center; gap:10px;
+  line-height: 1; text-decoration: none;
 }
 .btn-primary{ background: var(--primary); color:#fff; box-shadow: var(--shadow-sm); }
 .btn-primary:hover{ background: var(--primary-700); }
@@ -98,6 +99,13 @@ body {
 
 .btn-tertiary{ background: #F1F5F9; color:#0F172A; border-color: #E2E8F0; }
 .btn-tertiary:hover{ background: #E2E8F0; }
+
+/* Icone nei bottoni (lucide svg) — evita salti di baseline */
+.btn-primary i, .btn-primary svg,
+.btn-secondary i, .btn-secondary svg,
+.btn-tertiary i, .btn-tertiary svg{
+  width:20px; height:20px; display:block; flex:0 0 20px;
+}
 
 /* Lead indicators */
 .lead-pill{
@@ -154,6 +162,11 @@ body {
   content: "✔"; position: absolute; right: 12px; top: 50%;
   transform: translateY(-50%); font-size: 12px; color: #16A34A;
 }
+/* (Rigorous unlock) locked opzionale per voci */
+.step-link.locked{
+  opacity:.55; cursor:not-allowed; pointer-events:none;
+  background:#F8FAFC; color:#94A3B8; border-color:#E2E8F0;
+}
 
 /* Form section */
 .form-section{
@@ -199,6 +212,19 @@ input:focus, select:focus, textarea:focus{ border-color: var(--primary); box-sha
 [id^="grp_"]{ transition: opacity .2s ease, transform .2s ease; }
 [id^="grp_"].hidden{ opacity: 0; pointer-events: none; height:0; transform: translateY(-6px); }
 
+/* (Rigorous unlock) Step bloccato: overlay (non usato se il fieldset è hidden) */
+.step.locked{
+  position: relative; pointer-events: none; filter: grayscale(.1) opacity(.7);
+}
+.step.locked::after{
+  content: "Completa la presentazione delle soluzioni (Step 4) per attivare la Survey finale.";
+  position: absolute; inset: 0;
+  display:flex; align-items:center; justify-content:center;
+  padding: 18px; text-align: center; font-weight: 800; color:#0f172a;
+  background: rgba(248, 250, 252, .75);
+  border: 1px dashed #CBD5E1; border-radius: var(--radius);
+}
+
 /* Match summary (right panel) */
 .match-summary{
   background: var(--card);
@@ -223,22 +249,46 @@ input:focus, select:focus, textarea:focus{ border-color: var(--primary); box-sha
   padding:6px 10px; border-radius:999px; font-weight:700; font-size:.9rem;
 }
 
+/* Perché questa scelta */
+.bullet-list{ margin: 6px 0 0; padding-left: 18px; }
+.bullet-list li{ margin: 2px 0; }
+
 #caseStudyCard{ margin-top: 12px; }
 #caseStudyGrid{ display:grid; grid-template-columns: 1fr; gap:10px; }
 #caseStudyGrid .result-item{ border-left: 4px solid #E2E8F0; padding-left: 10px; }
 
+/* Charts */
 .charts{ display:grid; grid-template-columns: 1fr; gap:14px; margin:10px 0 14px 0; }
 .chart-block{ background:#fff; border:1px solid var(--border); border-radius:16px; padding:12px; }
 .chart-title{ margin:0 0 8px 0; font-size:.95rem; color:#1f2937; }
 .chart-caption{ margin:6px 0 0 0; color: var(--muted); font-size:.8rem; }
 canvas{ width:100%!important; height:auto!important; display:block; }
 
+/* Next steps */
 #nextSteps{ margin-top: 12px; }
 .checklist p{ margin: 8px 0; position: relative; padding-left: 26px; }
 .checklist p::before{ content: "☑"; position:absolute; left:0; top:0; line-height:1; color: #0E7490; }
 
-/* Export buttons */
-.export-btns{ display:grid; grid-template-columns: 1fr; gap:8px; margin-top:8px; }
+/* Export buttons — FIX allineamento perfetto */
+.export-btns{
+  display:grid; grid-template-columns: 1fr; gap:10px; margin-top:8px;
+}
+.export-btns .btn-primary,
+.export-btns .btn-secondary,
+.export-btns .btn-tertiary,
+.export-btns a.btn-primary,
+.export-btns a.btn-secondary,
+.export-btns a.btn-tertiary{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;   /* icona+testo allineati a sinistra */
+  gap:10px;
+  min-height:48px;
+  padding:12px 16px;
+  line-height:1;
+  text-decoration:none;
+}
 
 /* Survey result pill */
 .survey-result{
@@ -262,7 +312,7 @@ canvas{ width:100%!important; height:auto!important; display:block; }
 .modal-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
 .modal-body p{ margin:0 0 8px 0; color:var(--muted); }
 
-/* Modal XL + Viewer integrato (Office Web Viewer) */
+/* Modal XL + Viewer integrato */
 .modal--xl { align-items: center; }
 .modal-card--xl{
   width: min(1200px, 96vw);
@@ -330,8 +380,3 @@ a:hover { text-decoration: underline; }
   .match-summary{ display:block; border-left:none; border-top:1px solid var(--border); }
   .header{ position: sticky; }
 }
-
-
-/* Links */
-a { color: var(--primary); text-decoration: none; }
-a:hover { text-decoration: underline; }
