@@ -13,7 +13,7 @@
   <!-- CSS -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Vendor (caricati in defer per performance) -->
+  <!-- Vendor (in ordine, tutti defer per performance) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
@@ -291,7 +291,7 @@
             </div>
           </div>
 
-          <!-- Azioni: Presenta soluzioni (nuovo) + Match -->
+          <!-- Azioni: Presenta soluzioni + Match -->
           <div class="actions-row">
             <button type="button" id="presentaBtn" class="btn-secondary" aria-label="Apri presentazioni">
               <i data-lucide="book-open" aria-hidden="true"></i> Presenta soluzioni
@@ -438,7 +438,7 @@
           <i data-lucide="mail"></i> Email recap
         </button>
 
-        <!-- Vai al preventivo: ora è un link che apre in nuova scheda -->
+        <!-- Vai al preventivo: link ufficiale -->
         <a id="openPreventivo"
            class="btn-secondary"
            href="https://enterprise-2025.github.io/Accesso-preventivatori/"
@@ -483,23 +483,33 @@
     </div>
   </div>
 
-  <!-- MODAL: Presenta soluzioni -->
-  <div id="presentaModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="presentaTitle">
-    <div class="modal-card">
-      <div class="modal-header">
+  <!-- MODAL: Presenta soluzioni (con viewer) -->
+  <div id="presentaModal" class="modal hidden modal--xl" role="dialog" aria-modal="true" aria-labelledby="presentaTitle">
+    <div class="modal-card modal-card--xl">
+      <div class="modal-header viewer-toolbar">
+        <button id="presentaBack" class="btn-tertiary hidden" type="button" aria-label="Torna alla scelta">← Indietro</button>
         <h3 id="presentaTitle">Presentazioni rapide</h3>
+        <div class="spacer"></div>
+        <a id="presentaOpenInNew" class="btn-secondary hidden" target="_blank" rel="noopener">Apri in nuova scheda</a>
         <button id="presentaClose" class="btn-tertiary" type="button" aria-label="Chiudi popup">✕</button>
       </div>
+
       <div class="modal-body">
-        <p>Scegli cosa mostrare:</p>
-        <div class="actions-row">
-          <!-- Inserisci qui gli URL reali dei documenti di presentazione -->
-          <button id="openGipo" class="btn-primary" type="button" data-doc-url="https://URL_PRESENTAZIONE_GIPONEXT">
+        <!-- Scelta -->
+        <div id="presentaChooser" class="actions-row">
+          <!-- Se li metti nella cartella /presentazioni/ rinomina i file così: -->
+          <!-- /presentazioni/giponext.pptx e /presentazioni/miodottore-crm.pptx -->
+          <button id="openGipo" class="btn-primary" type="button" data-doc-url="presentazioni/giponext.pptx">
             <i data-lucide="file-text" aria-hidden="true"></i> GipoNext
           </button>
-          <button id="openMio" class="btn-primary" type="button" data-doc-url="https://URL_PRESENTAZIONE_MIODOTTORE">
+          <button id="openMio" class="btn-primary" type="button" data-doc-url="presentazioni/miodottore-crm.pptx">
             <i data-lucide="file-text" aria-hidden="true"></i> MioDottore
           </button>
+        </div>
+
+        <!-- Viewer -->
+        <div id="docViewer" class="viewer hidden" role="document" aria-label="Visualizzatore presentazioni">
+          <iframe id="docFrame" class="viewer-frame" title="Presentazione" loading="lazy"></iframe>
         </div>
       </div>
     </div>
@@ -521,4 +531,5 @@
   </script>
 </body>
 </html>
+
 
