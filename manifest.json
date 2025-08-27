@@ -1,20 +1,54 @@
 {
+  "id": "it.qpwon.spinmatch",
   "name": "QPWON SpinMatch Pro",
   "short_name": "SpinMatch",
-  "start_url": ".",
+  "description": "Discovery SPIN, match di soluzioni (GipoNext, MioDottore, Combo), case study reali e chiusura con prossimi passi.",
+  "lang": "it-IT",
+  "dir": "ltr",
+
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "portrait",
+
   "background_color": "#FFFFFF",
   "theme_color": "#0EA5A4",
+
   "icons": [
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+
+  "shortcuts": [
+    {
+      "name": "Genera Match",
+      "short_name": "Match",
+      "url": "#step-4",
+      "icons": [
+        { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    },
+    {
+      "name": "Survey finale",
+      "short_name": "Survey",
+      "url": "#step-5",
+      "icons": [
+        { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    }
+  ],
+
+  "categories": ["productivity", "business", "medical"],
+  "prefer_related_applications": false
 }

@@ -1,4 +1,5 @@
-// script.js — SpinMatch Pro (rigorous unlock • real case studies only • next-steps smart • full PDF)
+// script.js — SpinMatch Pro
+// (rigorous unlock • real case studies only • next-steps smart • full PDF)
 (() => {
   "use strict";
 
@@ -8,15 +9,15 @@
   const LS_KEYS = {
     FORM: "spinmatch_pro_form_v2",
     ONBOARDING_HIDE: "spinmatch_pro_onboarding_hide_v1",
-    SURVEY_UNLOCK: "spinmatch_pro_survey_unlock_v1", // NEW: persistenza sblocco Survey
+    SURVEY_UNLOCK: "spinmatch_pro_survey_unlock_v1"
   };
 
   const URLS = {
     PREVENTIVO: "https://enterprise-2025.github.io/Accesso-preventivatori/",
-    BOOKING_FALLBACK: "https://calendar.google.com", // se non imposti data-url/BOOKING_URL
+    BOOKING_FALLBACK: "https://calendar.google.com"
   };
 
-  const PRESENTATION_VIEW_SECONDS = 10; // NEW: tempo minimo viewer aperto per sbloccare la Survey
+  const PRESENTATION_VIEW_SECONDS = 10; // tempo minimo viewer aperto per sbloccare la Survey
 
   const qs  = (id) => document.getElementById(id);
   const qsa = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -49,8 +50,8 @@
   // Navigazione step
   const stepLinks     = qsa(".step-link");
   const stepFieldsets = qsa("fieldset.step");
-  const navStep5Btn   = document.querySelector('.step-link[data-step="5"]'); // NEW: riferimento link step 5
-  const step5Fieldset = qs("step-5");                                       // NEW: fieldset step 5
+  const navStep5Btn   = document.querySelector('.step-link[data-step="5"]');
+  const step5Fieldset = qs("step-5");
   const navStep4Btn   = document.querySelector('.step-link[data-step="4"]');
 
   // Onboarding
@@ -227,17 +228,17 @@
     2: [], // Step 2: “almeno uno” (vedi ANY_FIELDS)
     3: ["obiettivo_6m"],
     4: ["problema_principale"],
-    5: ["consapevolezza", "interesse", "budget", "timeline", "blocco"],
+    5: ["consapevolezza", "interesse", "budget", "timeline", "blocco"]
   };
   const ANY_FIELDS = {
-    2: ["tempo_compiti", "perdite_stimate", "area_critica", "area_critica_altro"],
+    2: ["tempo_compiti", "perdite_stimate", "area_critica", "area_critica_altro"]
   };
 
   function stepCompleted(stepIndex) {
     const reqAll = MIN_FIELDS[stepIndex] || [];
     const reqAny = ANY_FIELDS[stepIndex] || [];
 
-    if (stepIndex === 5 && !isSurveyUnlocked()) return false; // NEW: finché bloccata, non può essere “completata”
+    if (stepIndex === 5 && !isSurveyUnlocked()) return false;
 
     if (reqAll.length) {
       return reqAll.every(name => {
@@ -297,20 +298,20 @@
       citta: (fd.get("clinica_citta") || "").toString().trim(),
       struttura_tipo, n_medici, gestionale, canale, areaCritica, obiettivo,
       perdite: parseFloat(fd.get("perdite_stimate") || "0") || 0,
-      ore: parseFloat(fd.get("tempo_compiti") || "0") || 0,
+      ore: parseFloat(fd.get("tempo_compiti") || "0") || 0
     };
   }
 
-  // === Catalogo: SOLO case study reali (niente fetch, niente fallback) ===
+  // === Catalogo: SOLO case study reali (niente fetch) ===
   const REAL_CASES = [
     {
-      nome: "CDM111 (Roma)",
-      contesto: "Poliambulatorio; focus visibilità + booking + reminder",
-      tag: { size: "m", canale: "miodottore", focus: "visibilità", gestionale: "altro", prodotto: "mio" },
-      leva: "Profilo ottimizzato, prenotazione online, reminder",
-      metrica: { label: "Prenotazioni/anno", delta: "1.700" },
-      incremento: 19,
-      pdf: "./CDM111 ha gestito 1700 prenotazioni in un anno con MioDottore.pdf"
+      nome: "Centro Medico Proxima (Milano)",
+      contesto: "Poliambulatorio; integrazione GipoNext + MioDottore",
+      tag: { size: "l", canale: "sito web", focus: "prenotazioni", gestionale: "altro", prodotto: "combo" },
+      leva: "Online booking integrato + gestione agende",
+      metrica: { label: "Prenotazioni online", delta: "≈4.500/anno (35% fuori orario)" },
+      incremento: 24,
+      pdf: "cases/proxima-giponext-miodottore-innovazione-crescita.pdf"
     },
     {
       nome: "Homedica (Merone)",
@@ -319,16 +320,16 @@
       leva: "Integrazione PMS + spinta domanda",
       metrica: { label: "Recensioni", delta: "+450" },
       incremento: 22,
-      pdf: "./Gipo e MioDottore hanno assicurato visibilità e pazienti ad Homedica.pdf"
+      pdf: "cases/homedica-giponext-miodottore-visibilita-pazienti.pdf"
     },
     {
-      nome: "Centro Medico Proxima (Milano)",
-      contesto: "Poliambulatorio; integrazione GipoNext + MioDottore",
-      tag: { size: "l", canale: "sito web", focus: "prenotazioni", gestionale: "altro", prodotto: "combo" },
-      leva: "Online booking integrato + gestione agende",
-      metrica: { label: "Prenotazioni online", delta: "≈4.500/anno (35% fuori orario)" },
-      incremento: 24,
-      pdf: "./Giponext e MioDottore_ Innovazione e Crescita al Centro Medico Proxima.pdf"
+      nome: "CDM111 (Roma)",
+      contesto: "Poliambulatorio; focus visibilità + booking + reminder",
+      tag: { size: "m", canale: "miodottore", focus: "visibilità", gestionale: "altro", prodotto: "mio" },
+      leva: "Profilo ottimizzato, prenotazione online, reminder",
+      metrica: { label: "Prenotazioni/anno", delta: "1.700" },
+      incremento: 19,
+      pdf: "cases/CDM111-miodottore-1700-prenotazioni.pdf" // attenzione al maiuscolo CDM111
     },
     {
       nome: "Check Up Centre (Cavallino)",
@@ -337,7 +338,7 @@
       leva: "Phone + KPI risposta + flussi",
       metrica: { label: "No-show", delta: "≈1% • 1.400+ recensioni" },
       incremento: 16,
-      pdf: "./MioDottore Phone facilita il lavoro di segreteria per Check Up Centre.pdf"
+      pdf: "cases/checkup-centre-miodottore-phone-segreteria.pdf"
     }
   ];
 
@@ -415,7 +416,7 @@
     const labelMap = {
       gipo:  "GipoNext (PMS)",
       mio:   "MioDottore (CRM + Visibilità)",
-      combo: "GipoNext + Visibilità",
+      combo: "GipoNext + Visibilità"
     };
 
     const benefits = {
@@ -436,7 +437,7 @@
         "Riduzione telefonate e no-show",
         "Slot riempiti con visibilità",
         "KPI end-to-end (domanda → agenda)"
-      ],
+      ]
     };
 
     const reasons = [];
@@ -561,13 +562,12 @@
     cases.forEach(cs => {
       const card = document.createElement("div");
       card.className = "result-item";
-      card.dataset.pdf = cs.pdf || "";
       card.innerHTML = `
         <div><strong>${cs.nome}</strong></div>
         <div>${cs.contesto}</div>
         <div>Leva principale: <em>${cs.leva}</em></div>
         <div>${cs.metrica?.label || ""}: <strong>${cs.metrica?.delta || ""}</strong></div>
-        ${cs.pdf ? `<div style="margin-top:4px;"><a class="btn-tertiary" href="#" data-open-pdf>Apri PDF</a></div>` : ""}
+        ${cs.pdf ? `<div style="margin-top:6px;"><a class="btn-tertiary" href="${encodeURI(cs.pdf)}" target="_blank" rel="noopener">Apri PDF</a></div>` : ""}
       `;
       grid.appendChild(card);
     });
@@ -631,7 +631,6 @@
     renderCharts(out);
     showResults();
 
-    // NEW: memorizza match + mostra i motivi
     lastRecommendation = out;
     renderMatchWhy(out.prodotto?.reasons || []);
 
@@ -738,7 +737,7 @@
     } else if (blocco === "roi") {
       addons.push(
         "Add-on: Baseline numerica (no-show, chiamate, ore) + simulazione ROI semplice (€ no-show evitati + costo orario risparmiato).",
-        "Add-on: Obiettivo 90 giorni firmato (1 metrica principale, 2 di supporto)."
+        "Add-on: L’obiettivo 90 giorni viene formalizzato e condiviso."
       );
     } else if (blocco === "pronto") {
       addons.push(
@@ -779,7 +778,6 @@
     div.className = "survey-result"; div.style.borderLeftColor = status.color; div.textContent = `Valutazione: ${status.label}`;
     matchSummary.appendChild(div);
 
-    // NEW: prendo blocco + budget dalla survey
     const fd = new FormData(form);
     const survey = {
       blocco: fd.get("blocco") || "",
@@ -828,7 +826,7 @@
         const srcCanvases = {
           pie: document.getElementById("pieChart"),
           spark: document.getElementById("sparklineChart"),
-          roi: document.getElementById("roiChart"),
+          roi: document.getElementById("roiChart")
         };
 
         const replaceCanvas = (cloneId, srcCanvas) => {
@@ -857,12 +855,12 @@
       temp.style.padding = "18px";
       temp.style.background = "#ffffff";
       temp.style.color = "#111827";
-      temp.style.width = "980px"; // ottimo per A4 verticale
+      temp.style.width = "980px";
       temp.style.fontFamily = "Inter, Arial, sans-serif";
       temp.style.fontSize = "12px";
       temp.id = "printRoot";
 
-      // Header pulito
+      // Header
       const header = document.createElement("div");
       header.style.display = "flex";
       header.style.alignItems = "center";
@@ -1021,7 +1019,7 @@
 
     lastRecommendation = null;
 
-    applySurveyVisibility(); // NEW: torna locked
+    applySurveyVisibility(); // torna locked
     if (SCROLLER) SCROLLER.scrollTo({ top: 0, behavior: "smooth" });
     updateProgressAndSidebar();
     toast("Nuova sessione pronta");
@@ -1045,7 +1043,6 @@
 
   function startPresentationWatch() {
     stopPresentationWatch();
-    // Avvia il countdown solo se il viewer è davvero visibile
     const modalVisible  = !presentaModal?.classList.contains("hidden");
     const viewerVisible = modalVisible && !viewerWrap?.classList.contains("hidden");
     if (!viewerVisible) return;
@@ -1072,7 +1069,6 @@
     if (presentaTitleEl) presentaTitleEl.textContent = title || "Presentazione";
     if (frame) {
       frame.src = embed;
-      // Avvia il timer allo 'load' dell'iframe (viewer effettivamente pronto)
       const onLoad = () => { frame.removeEventListener("load", onLoad); startPresentationWatch(); };
       frame.addEventListener("load", onLoad);
     }
@@ -1125,20 +1121,19 @@
   function unlockSurveyUI() {
     try { localStorage.setItem(LS_KEYS.SURVEY_UNLOCK, "1"); } catch {}
     applySurveyVisibility();
-    // Annuncio ARIA semplice via toast; qui potresti anche usare un'area aria-live dedicata
   }
 
   function applySurveyVisibility() {
     const unlocked = isSurveyUnlocked();
 
-    // Sidebar: nascondi/mostra voce step 5 (se presente), oppure marcala locked
+    // Sidebar: nascondi/mostra voce step 5
     if (navStep5Btn) {
-      navStep5Btn.style.display = unlocked ? "" : "none"; // “solo dopo” diventa visibile
+      navStep5Btn.style.display = unlocked ? "" : "none";
       navStep5Btn.classList.toggle("locked", !unlocked);
       navStep5Btn.setAttribute("aria-disabled", unlocked ? "false" : "true");
     }
 
-    // Fieldset step 5: visibile solo se unlocked
+    // Fieldset step 5
     if (step5Fieldset) {
       if (unlocked) {
         step5Fieldset.removeAttribute("hidden");
@@ -1195,19 +1190,6 @@
       bookMeetingBtn.addEventListener("click", (e) => {
         e.preventDefault();
         openExternal(url, "Calendario appuntamenti");
-      });
-    }
-
-    // Click su card case study → apre PDF originale
-    const grid = qs("caseStudyGrid");
-    if (grid) {
-      grid.addEventListener("click", (e) => {
-        const a = e.target.closest("[data-open-pdf]");
-        if (!a) return;
-        e.preventDefault();
-        const card = e.target.closest(".result-item");
-        const pdf  = card?.dataset.pdf || "";
-        if (pdf) openExternal(encodeURI(toAbsUrl(pdf)), "Case study");
       });
     }
 

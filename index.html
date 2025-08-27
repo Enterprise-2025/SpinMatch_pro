@@ -7,10 +7,10 @@
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
-  <link rel="icon" href="icons/icon-192.png" type="image/png" />
   <meta name="theme-color" content="#0EA5A4" />
+  <link rel="icon" href="icons/icon-192.png" type="image/png" />
 
-  <!-- CSS -->
+  <!-- Styles -->
   <link rel="stylesheet" href="style.css" />
 
   <!-- Vendor (defer per performance) -->
@@ -60,7 +60,7 @@
           <li><button class="step-link" data-step="2" aria-controls="step-2"><i data-lucide="wallet"></i> 2. Costi Nascosti</button></li>
           <li><button class="step-link" data-step="3" aria-controls="step-3"><i data-lucide="trending-up"></i> 3. Opportunità</button></li>
           <li><button class="step-link" data-step="4" aria-controls="step-4"><i data-lucide="help-circle"></i> 4. SPIN Selling</button></li>
-          <!-- Step 5 inizialmente nascosto per evitare flicker; lo script lo mostrerà quando sbloccato -->
+          <!-- Step 5 nascosto di default: lo script lo mostrerà quando sbloccato -->
           <li><button class="step-link" data-step="5" aria-controls="step-5" style="display:none;"><i data-lucide="check-square"></i> 5. Survey Finale</button></li>
         </ul>
       </nav>
@@ -303,7 +303,7 @@
           </div>
         </fieldset>
 
-        <!-- STEP 5 (rigorous unlock: hidden by default, mostrato dallo script) -->
+        <!-- STEP 5 (hidden → sblocco da script) -->
         <fieldset class="step" id="step-5" aria-label="Survey finale" hidden>
           <legend><i data-lucide="check-square"></i> 5. Survey Finale</legend>
 
@@ -401,7 +401,6 @@
         </div>
       </div>
 
-      <!-- NEW: Box motivazioni -->
       <div class="card" id="matchWhy" hidden>
         <h4 class="chart-title"><i data-lucide="info"></i> Perché questa scelta</h4>
         <ul id="matchWhyList" class="bullet-list"></ul>
@@ -444,7 +443,7 @@
           <i data-lucide="mail"></i> Email recap
         </button>
 
-        <!-- Vai al preventivo: link ufficiale -->
+        <!-- Vai al preventivo -->
         <a id="openPreventivo"
            class="btn-secondary"
            href="https://enterprise-2025.github.io/Accesso-preventivatori/"
@@ -453,7 +452,7 @@
           <i data-lucide="file-signature" aria-hidden="true"></i> Vai al preventivo
         </a>
 
-        <!-- NEW: Fissa appuntamento (imposta data-url o window.BOOKING_URL) -->
+        <!-- Fissa appuntamento (sostituisci data-url col tuo link pubblico di Google Calendar) -->
         <button id="bookMeeting" class="btn-secondary" type="button"
                 data-url="https://calendar.app.google/INSERISCI-IL-TUO-LINK-PUBBLICO"
                 aria-label="Fissa appuntamento sul mio calendario">
@@ -496,7 +495,7 @@
     </div>
   </div>
 
-  <!-- MODAL: Presenta soluzioni (con viewer) -->
+  <!-- MODAL: Presenta soluzioni + Viewer -->
   <div id="presentaModal" class="modal hidden modal--xl" role="dialog" aria-modal="true" aria-labelledby="presentaTitle">
     <div class="modal-card modal-card--xl">
       <div class="modal-header viewer-toolbar">
@@ -510,7 +509,7 @@
       <div class="modal-body">
         <!-- Scelta -->
         <div id="presentaChooser" class="actions-row">
-          <!-- Aggiorna i percorsi se i nomi dei PDF sono diversi -->
+          <!-- Questi PDF devono esistere nella cartella /presentazioni/ -->
           <button id="openGipo" class="btn-primary" type="button" data-doc-url="presentazioni/giponext.pdf">
             <i data-lucide="file-text" aria-hidden="true"></i> GipoNext
           </button>
@@ -530,9 +529,6 @@
   <footer class="sr-only" role="contentinfo">
     <p>SpinMatch Pro — Discovery, raccomandazione e chiusura.</p>
   </footer>
-
-  <!-- (Opzionale) Se vuoi evitare 404 su cases.json:
-  <script>window.SPINMATCH_CASES_URL = null;</script> -->
 
   <!-- App script -->
   <script src="script.js" defer></script>
